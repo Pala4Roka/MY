@@ -63,6 +63,18 @@ export default function ChatInterface({ sessionId, onUnlockClassified }) {
     setInput('');
     setLoading(true);
 
+    // Check if online
+    if (!navigator.onLine) {
+      const offlineMessage = { 
+        role: 'assistant', 
+        content: 'К сожалению, я сейчас в офлайн режиме. Для полного функционала необходимо подключение к сети. Но я всё ещё здесь с вами!' 
+      };
+      setMessages(prev => [...prev, offlineMessage]);
+      speak(offlineMessage.content);
+      setLoading(false);
+      return;
+    }
+
     try {
       const response = await axios.post(`${API}/chat`, {
         message: input,
