@@ -70,13 +70,13 @@ curl -O https://anomaly-catalog.preview.emergentagent.com/scp-database-archive.z
 
 ### TAR.GZ:
 ```bash
-tar -xzf scp-database-archive.tar.gz
+tar -xzf scp-database-complete.tar.gz
 cd backend  # или frontend
 ```
 
 ### ZIP:
 ```bash
-unzip scp-database-archive.zip
+unzip scp-database-complete.zip
 cd backend  # или frontend
 ```
 
