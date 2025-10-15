@@ -39,6 +39,26 @@ body {
   box-shadow: 0 0 20px rgba(220, 38, 38, 0.3);
 }
 
+.header-logo {
+  margin-bottom: 1.5rem;
+}
+
+.logo {
+  height: 120px;
+  width: auto;
+  filter: drop-shadow(0 0 10px rgba(220, 38, 38, 0.5));
+  animation: pulse 3s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    filter: drop-shadow(0 0 10px rgba(220, 38, 38, 0.5));
+  }
+  50% {
+    filter: drop-shadow(0 0 20px rgba(220, 38, 38, 0.8));
+  }
+}
+
 .title {
   font-family: 'Share Tech Mono', monospace;
   font-size: 3rem;
