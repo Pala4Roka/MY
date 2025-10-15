@@ -28,11 +28,6 @@ export default function DossierList({ objects, onObjectClick, loading }) {
               <span className="threat-label">Класс угрозы:</span>
               <span className="threat-value">{obj.threat_class}</span>
             </div>
-            {obj.image_url && !obj.image_url.endsWith('.glb') && (
-              <div className="dossier-image">
-                <img src={obj.image_url} alt={obj.name} />
-              </div>
-            )}
             <button className="view-btn">Подробнее</button>
           </div>
         ))}
