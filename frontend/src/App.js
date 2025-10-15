@@ -1,52 +1,95 @@
-import { useEffect } from "react";
-import "@/App.css";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import axios from "axios";
+import React, { useState, useEffect } from 'react';
+import './App.css';
+import { v4 as uuidv4 } from 'uuid';
+import ChatInterface from './components/ChatInterface';
+import DossierList from './components/DossierList';
+import DossierModal from './components/DossierModal';
+import CursorFollower from './components/CursorFollower';
+import axios from 'axios';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
 
-const Home = () => {
-  const helloWorldApi = async () => {
+function App() {
+  const [sessionId] = useState(() => uuidv4());
+  const [publicObjects, setPublicObjects] = useState([]);
+  const [classifiedObjects, setClassifiedObjects] = useState([]);
+  const [hasAccessToClassified, setHasAccessToClassified] = useState(false);
+  const [selectedObject, setSelectedObject] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchPublicObjects();
+  }, []);
+
+  const fetchPublicObjects = async () => {
     try {
-      const response = await axios.get(`${API}/`);
-      console.log(response.data.message);
-    } catch (e) {
-      console.error(e, `errored out requesting / api`);
+      const response = await axios.get(`${API}/scp/public`);
+      setPublicObjects(response.data);
+      setLoading(false);
+    } catch (error) {
+      console.error('Error fetching public objects:', error);
+      setLoading(false);
     }
   };
 
-  useEffect(() => {
-    helloWorldApi();
-  }, []);
+  const fetchClassifiedObjects = async () => {
+    try {
+      const response = await axios.get(`${API}/scp/classified`);
+      setClassifiedObjects(response.data);
+      setHasAccessToClassified(true);
+    } catch (error) {
+      console.error('Error fetching classified objects:', error);
+    }
+  };
 
-  return (
-    <div>
-      <header className="App-header">
-        <a
-          className="App-link"
-          href="https://emergent.sh"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <img src="https://avatars.githubusercontent.com/in/1201222?s=120&u=2686cf91179bbafbc7a71bfbc43004cf9ae1acea&v=4" />
-        </a>
-        <p className="mt-5">Building something incredible ~!</p>
-      </header>
-    </div>
-  );
-};
+  const handleUnlockClassified = () => {
+    fetchClassifiedObjects();
+  };
 
-function App() {
+  const handleObjectClick = (object) => {
+    setSelectedObject(object);
+  };
+
+  const handleCloseModal = () => {
+    setSelectedObject(null);
+  };
+
   return (
     <div className="App">
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Home />}>
-            <Route index element={<Home />} />
-          </Route>
-        </Routes>
-      </BrowserRouter>
+      {/* Cursor Follower */}
+      <CursorFollower />
+      
+      {/* Main Content */}
+      <div className="main-content">
+        <header className="header">
+          <h1 className="title">ETERNAL SENTINELS DATABASE</h1>
+          <p className="subtitle">Observe • Contain • Defend</p>
+        </header>
+
+        {/* Chat Interface */}
+        <ChatInterface 
+          sessionId={sessionId} 
+          onUnlockClassified={handleUnlockClassified}
+        />
+
+        {/* Dossier List */}
+        <div className="dossier-container">
+          <DossierList 
+            objects={[...publicObjects, ...(hasAccessToClassified ? classifiedObjects : [])]}
+            onObjectClick={handleObjectClick}
+            loading={loading}
+          />
+        </div>
+      </div>
+
+      {/* Modal for detailed view */}
+      {selectedObject && (
+        <DossierModal 
+          object={selectedObject} 
+          onClose={handleCloseModal}
+        />
+      )}
     </div>
   );
 }
