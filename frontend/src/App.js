@@ -56,12 +56,12 @@ function App() {
 
   return (
     <div className="App">
-      {/* Cursor Follower */}
-      <CursorFollower />
-      
       {/* Main Content */}
       <div className="main-content">
         <header className="header">
+          <div className="header-logo">
+            <img src="/assets/logo.png" alt="Eternal Sentinels Logo" className="logo" />
+          </div>
           <h1 className="title">ETERNAL SENTINELS DATABASE</h1>
           <p className="subtitle">Observe • Contain • Defend</p>
         </header>
