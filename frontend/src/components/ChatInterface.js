@@ -30,17 +30,27 @@ export default function ChatInterface({ sessionId, onUnlockClassified }) {
     const utterance = new SpeechSynthesisUtterance(text);
     const voices = synth.getVoices();
     
-    // Try to find a female Russian voice, fallback to any female voice
+    // Try to find the best female Russian voice
     const femaleVoice = voices.find(voice => 
-      (voice.lang.includes('ru') && voice.name.toLowerCase().includes('female')) ||
+      (voice.lang.includes('ru') && (
+        voice.name.toLowerCase().includes('female') ||
+        voice.name.toLowerCase().includes('woman') ||
+        voice.name.toLowerCase().includes('elena') ||
+        voice.name.toLowerCase().includes('milena')
+      ))
+    ) || voices.find(voice => 
       voice.name.toLowerCase().includes('female') ||
-      voice.name.toLowerCase().includes('woman')
-    ) || voices[0];
+      voice.name.toLowerCase().includes('google') && voice.lang.includes('ru')
+    ) || voices.find(voice => voice.lang.includes('ru')) || voices[0];
     
     utterance.voice = femaleVoice;
-    utterance.rate = 0.9;
-    utterance.pitch = 1.2;
-    utterance.volume = 0.8;
+    utterance.rate = 0.85; // Slower for more sensual effect
+    utterance.pitch = 1.3; // Higher for femininity
+    utterance.volume = 0.9;
+    
+    utterance.onstart = () => setIsSpeaking(true);
+    utterance.onend = () => setIsSpeaking(false);
+    utterance.onerror = () => setIsSpeaking(false);
     
     synth.speak(utterance);
   };
