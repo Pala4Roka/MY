@@ -1,4 +1,4 @@
-from fastapi import FastAPI, APIRouter
+from fastapi import FastAPI, APIRouter, HTTPException
 from dotenv import load_dotenv
 from starlette.middleware.cors import CORSMiddleware
 from motor.motor_asyncio import AsyncIOMotorClient
@@ -6,7 +6,7 @@ import os
 import logging
 from pathlib import Path
 from pydantic import BaseModel, Field, ConfigDict
-from typing import List
+from typing import List, Optional
 import uuid
 from datetime import datetime, timezone
 
@@ -26,45 +26,74 @@ app = FastAPI()
 api_router = APIRouter(prefix="/api")
 
 
-# Define Models
-class StatusCheck(BaseModel):
-    model_config = ConfigDict(extra="ignore")  # Ignore MongoDB's _id field
+# Define Models for ES Objects
+class ESObject(BaseModel):
+    model_config = ConfigDict(extra="ignore")
     
-    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
-    client_name: str
-    timestamp: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    id: str
+    number: str
+    name: str
+    codename: str
+    threat_class: str
+    description: str
+    secret_data: Optional[str] = None
+    containment: Optional[str] = None
+    threat_level: Optional[str] = None
+    image_url: Optional[str] = None
 
-class StatusCheckCreate(BaseModel):
-    client_name: str
+class ESObjectResponse(BaseModel):
+    id: str
+    number: str
+    name: str
+    codename: str
+    threat_class: str
+    image_url: Optional[str] = None
+
+# Chat Models
+class ChatMessage(BaseModel):
+    message: str
+    
+class ChatResponse(BaseModel):
+    response: str
+    timestamp: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 # Add your routes to the router instead of directly to app
 @api_router.get("/")
 async def root():
-    return {"message": "Hello World"}
+    return {"message": "Eternal Sentinels Database API"}
 
-@api_router.post("/status", response_model=StatusCheck)
-async def create_status_check(input: StatusCheckCreate):
-    status_dict = input.model_dump()
-    status_obj = StatusCheck(**status_dict)
-    
-    # Convert to dict and serialize datetime to ISO string for MongoDB
-    doc = status_obj.model_dump()
-    doc['timestamp'] = doc['timestamp'].isoformat()
-    
-    _ = await db.status_checks.insert_one(doc)
-    return status_obj
+# ES Objects routes
+@api_router.get("/objects", response_model=List[ESObjectResponse])
+async def get_all_objects():
+    """Get all ES objects for the main page"""
+    objects = await db.es_objects.find({}, {"_id": 0}).to_list(1000)
+    return objects
 
-@api_router.get("/status", response_model=List[StatusCheck])
-async def get_status_checks():
-    # Exclude MongoDB's _id field from the query results
-    status_checks = await db.status_checks.find({}, {"_id": 0}).to_list(1000)
+@api_router.get("/objects/{object_id}", response_model=ESObject)
+async def get_object_detail(object_id: str):
+    """Get detailed information about a specific ES object"""
+    obj = await db.es_objects.find_one({"id": object_id}, {"_id": 0})
+    if not obj:
+        raise HTTPException(status_code=404, detail="Object not found")
+    return obj
+
+# Chat with MAL0
+@api_router.post("/chat", response_model=ChatResponse)
+async def chat_with_mal0(chat: ChatMessage):
+    """Chat with MAL0 assistant"""
+    # Basic MAL0 responses
+    responses = [
+        "Я MAL0, ассистент базы данных Eternal Sentinels. Чем могу помочь?",
+        "Информация об объектах строго засекречена. Выберите досье для подробностей.",
+        "Eternal Sentinels наблюдает, сдерживает и защищает все реальности.",
+        "Объект 0000 основал нашу организацию для защиты мультивселенной.",
+        "Какой объект вас интересует? Все данные доступны в досье."
+    ]
     
-    # Convert ISO string timestamps back to datetime objects
-    for check in status_checks:
-        if isinstance(check['timestamp'], str):
-            check['timestamp'] = datetime.fromisoformat(check['timestamp'])
+    import random
+    response_text = random.choice(responses)
     
-    return status_checks
+    return ChatResponse(response=response_text)
 
 # Include the router in the main app
 app.include_router(api_router)
