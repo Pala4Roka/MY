@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import './App.css';
 import { v4 as uuidv4 } from 'uuid';
-import MAL0Model from './components/MAL0Model';
 import ChatInterface from './components/ChatInterface';
 import DossierList from './components/DossierList';
 import DossierModal from './components/DossierModal';
+import CursorFollower from './components/CursorFollower';
 import axios from 'axios';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
@@ -57,8 +57,8 @@ function App() {
 
   return (
     <div className="App">
-      {/* 3D Model Background */}
-      <MAL0Model />
+      {/* Cursor Follower */}
+      <CursorFollower />
       
       {/* Main Content */}
       <div className="main-content">
