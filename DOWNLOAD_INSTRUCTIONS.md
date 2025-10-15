@@ -2,43 +2,46 @@
 
 ## Доступные архивы
 
-Я создал **два формата архивов** вашего SCP Database сайта:
+Я создал **два формата архивов** вашего ПОЛНОГО SCP Database сайта:
 
-### 1. **scp-database-archive.tar.gz** (53 KB)
+### 1. **scp-database-complete.tar.gz** (61 KB)
 - Формат: TAR.GZ (сжатый архив)
 - Подходит для: Linux, macOS, Unix систем
-- Местоположение: `/app/scp-database-archive.tar.gz`
+- Местоположение: `/app/scp-database-complete.tar.gz`
 
-### 2. **scp-database-archive.zip** (84 KB)
+### 2. **scp-database-complete.zip** (93 KB)
 - Формат: ZIP
 - Подходит для: Windows, macOS, Linux
-- Местоположение: `/app/scp-database-archive.zip`
+- Местоположение: `/app/scp-database-complete.zip`
 
 ## Что включено в архив:
 
 ✅ **Backend (FastAPI + Python)**
-- server.py - главный файл API
-- seed_data.py - скрипт инициализации базы данных
-- requirements.txt - все зависимости Python
+- server.py - полный API с AI чатом MAL0
+- requirements.txt - все зависимости включая emergentintegrations
 - .env - файл конфигурации
+- Интеграция с GPT-5 через Emergent LLM Key
+- Автоматическая инициализация базы данных
 
 ✅ **Frontend (React 19)**
-- Все исходные файлы React приложения
-- HomePage.jsx - главная страница с чатом MAL0
-- ObjectDetailPage.jsx - страницы детальных досье
-- Все компоненты UI (Radix UI, Tailwind CSS)
+- MainPage.js - главная страница с анимированной MAL0
+- Полностью функциональный AI-чат с историей сессий
+- Карточки досье с модальными окнами
+- Анимированный фон и плавное следование MAL0 за курсором
+- Все UI компоненты (Radix UI, Shadcn/ui)
 - package.json - все зависимости Node.js
 - .env - файл конфигурации
+
+✅ **База данных**
+- 5 объектов ES (0000, 0003, 0002, 0004, 1471)
+- Автоматическое заполнение при первом запуске
+- MongoDB для хранения досье и истории чата
 
 ✅ **Документация**
 - README.md - полная инструкция по установке и запуску
 - Информация о структуре проекта
 - API endpoints
 - Troubleshooting
-
-✅ **База данных**
-- 14 объектов ES уже включены в seed_data.py
-- Автоматическое заполнение при первом запуске
 
 ## Что НЕ включено (для уменьшения размера):
 
