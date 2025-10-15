@@ -105,7 +105,12 @@ export default function ChatInterface({ sessionId, onUnlockClassified }) {
           <span className="chat-icon">👁</span>
           <h3>MAL0 - Объятия тени</h3>
         </div>
-        <div className="chat-status">Online</div>
+        <div className="chat-status">{isSpeaking ? 'Говорит...' : 'Online'}</div>
+      </div>
+      
+      {/* 3D Model of MAL0 */}
+      <div className="mal0-model-container">
+        <MAL0Model isTalking={isSpeaking} />
       </div>
       
       <div className="chat-messages">
