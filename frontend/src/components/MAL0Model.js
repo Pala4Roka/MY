@@ -2,15 +2,28 @@ import React, { useRef, useEffect, useState } from 'react';
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
 
-export default function MAL0Model({ isTalking = false }) {
+// Animation states for MAL0
+const ANIMATION_STATES = {
+  IDLE: 'idle',
+  NERVOUS: 'nervous',
+  SLEEPY: 'sleepy',
+  SLEEPING: 'sleeping',
+  PLAYFUL: 'playful',
+  HAPPY: 'happy'
+};
+
+export default function MAL0Model({ isTalking = false, emotion = 'idle' }) {
   const mountRef = useRef(null);
   const [loading, setLoading] = useState(true);
+  const [loadProgress, setLoadProgress] = useState(0);
   const [error, setError] = useState(false);
   const sceneRef = useRef(null);
   const modelRef = useRef(null);
+  const mixerRef = useRef(null);
   const rendererRef = useRef(null);
   const cameraRef = useRef(null);
   const animationIdRef = useRef(null);
+  const emotionStateRef = useRef({ current: 'idle', time: 0 });
 
   useEffect(() => {
     if (!mountRef.current) return;
