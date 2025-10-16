@@ -1,12 +1,9 @@
 import React, { useState, useRef, useEffect } from 'react';
-import axios from 'axios';
+import { chatAPI } from '../api';
 import './ChatInterface.css';
-// import MAL0Model from './MAL0Model';
+import MAL0Model from './MAL0Model';
 
-const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
-const API = `${BACKEND_URL}/api`;
-
-export default function ChatInterface({ sessionId, onUnlockClassified }) {
+export default function ChatInterface({ sessionId }) {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
@@ -30,17 +27,11 @@ export default function ChatInterface({ sessionId, onUnlockClassified }) {
     const utterance = new SpeechSynthesisUtterance(text);
     const voices = synth.getVoices();
     
-    // Try to find the best female Russian voice with priority for natural sounding voices
     const femaleVoice = voices.find(voice => 
       (voice.lang.includes('ru-RU') && (
         voice.name.toLowerCase().includes('google') ||
         voice.name.toLowerCase().includes('yandex') ||
-        voice.name.toLowerCase().includes('female') ||
-        voice.name.toLowerCase().includes('woman') ||
-        voice.name.toLowerCase().includes('elena') ||
-        voice.name.toLowerCase().includes('irina') ||
-        voice.name.toLowerCase().includes('milena') ||
-        voice.name.toLowerCase().includes('anna')
+        voice.name.toLowerCase().includes('female')
       ))
     ) || voices.find(voice => voice.lang.includes('ru-RU'))
       || voices.find(voice => voice.lang.includes('ru')) 
@@ -50,10 +41,9 @@ export default function ChatInterface({ sessionId, onUnlockClassified }) {
       utterance.voice = femaleVoice;
     }
     
-    // Настройки для сексуального, нежного, манящего голоса
-    utterance.rate = 0.8; // Медленнее для более чувственного эффекта
-    utterance.pitch = 1.15; // Немного выше для женственности, но не слишком высоко
-    utterance.volume = 1.0; // Полная громкость для четкости
+    utterance.rate = 0.9;
+    utterance.pitch = 1.1;
+    utterance.volume = 1.0;
     
     utterance.onstart = () => setIsSpeaking(true);
     utterance.onend = () => setIsSpeaking(false);
@@ -70,7 +60,6 @@ export default function ChatInterface({ sessionId, onUnlockClassified }) {
     setInput('');
     setLoading(true);
 
-    // Check if online
     if (!navigator.onLine) {
       const offlineMessage = { 
         role: 'assistant', 
@@ -83,21 +72,10 @@ export default function ChatInterface({ sessionId, onUnlockClassified }) {
     }
 
     try {
-      const response = await axios.post(`${API}/chat`, {
-        message: input,
-        session_id: sessionId
-      });
-
-      const assistantMessage = { role: 'assistant', content: response.data.response };
+      const response = await chatAPI.sendMessage(input, sessionId);
+      const assistantMessage = { role: 'assistant', content: response.response };
       setMessages(prev => [...prev, assistantMessage]);
-      
-      // Speak the response
-      speak(response.data.response);
-
-      // Check if classified was unlocked
-      if (response.data.unlocked_classified) {
-        onUnlockClassified();
-      }
+      speak(response.response);
     } catch (error) {
       console.error('Chat error:', error);
       const errorMessage = { 
@@ -127,23 +105,16 @@ export default function ChatInterface({ sessionId, onUnlockClassified }) {
         <div className="chat-status">{isSpeaking ? 'Говорит...' : 'Online'}</div>
       </div>
       
-      {/* 3D Model of MAL0 - Temporarily disabled */}
-      {/* <div className="mal0-model-container">
+      {/* 3D Model of MAL0 */}
+      <div className="mal0-model-container">
         <MAL0Model isTalking={isSpeaking} />
-      </div> */}
-      
-      <div className="mal0-placeholder">
-        <div style={{textAlign: 'center', padding: '60px', color: '#666'}}>
-          <div style={{fontSize: '80px'}}>🐺💀</div>
-          <p>MAL0 - 3D модель загружается...</p>
-        </div>
       </div>
       
       <div className="chat-messages">
         {messages.length === 0 && (
           <div className="welcome-message">
             <p>Добро пожаловать в базу данных Eternal Sentinels.</p>
-            <p>Я MAL0, ваш ассистент. Чем могу помочь?</p>
+            <p>Я MAL0, ваш профессиональный ассистент. Чем могу помочь?</p>
           </div>
         )}
         
