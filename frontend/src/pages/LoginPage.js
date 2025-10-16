@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { authAPI, setToken, setUser } from '../api';
 import './AuthPages.css';
+import ESLogo from '../components/ESLogo';
 
 export default function LoginPage({ onLogin }) {
   const [username, setUsername] = useState('');
@@ -23,7 +24,7 @@ export default function LoginPage({ onLogin }) {
       setUser(response.user);
       onLogin(response.user);
     } catch (err) {
-      setError(err.response?.data?.detail || 'Authentication failed');
+      setError(err.response?.data?.detail || 'Ошибка аутентификации');
     } finally {
       setLoading(false);
     }
@@ -33,19 +34,18 @@ export default function LoginPage({ onLogin }) {
     <div className="auth-page">
       <div className="auth-container">
         <div className="auth-header">
-          <div className="es-logo">🛡️</div>
-          <h1>ETERNAL SENTINELS</h1>
-          <p className="auth-subtitle">DATABASE ACCESS CONTROL</p>
+          <ESLogo size="medium" />
+          <p className="auth-subtitle">КОНТРОЛЬ ДОСТУПА К БАЗЕ ДАННЫХ</p>
         </div>
 
         <form className="auth-form" onSubmit={handleSubmit}>
           <div className="form-group">
-            <label>Username</label>
+            <label>Имя пользователя</label>
             <input
               type="text"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
-              placeholder="Enter username"
+              placeholder="Введите имя пользователя"
               required
               disabled={loading}
               data-testid="username-input"
@@ -53,12 +53,12 @@ export default function LoginPage({ onLogin }) {
           </div>
 
           <div className="form-group">
-            <label>Password</label>
+            <label>Пароль</label>
             <input
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              placeholder="Enter password"
+              placeholder="Введите пароль"
               required
               disabled={loading}
               data-testid="password-input"
@@ -77,7 +77,7 @@ export default function LoginPage({ onLogin }) {
             disabled={loading}
             data-testid="submit-btn"
           >
-            {loading ? 'PROCESSING...' : (isRegister ? 'REGISTER' : 'LOGIN')}
+            {loading ? 'ОБРАБОТКА...' : (isRegister ? 'РЕГИСТРАЦИЯ' : 'ВОЙТИ')}
           </button>
 
           <div className="auth-toggle">
@@ -91,20 +91,14 @@ export default function LoginPage({ onLogin }) {
               data-testid="toggle-auth-btn"
             >
               {isRegister
-                ? 'Already have an account? Login'
-                : 'Need an account? Register'}
+                ? 'Уже есть аккаунт? Войти'
+                : 'Нужен аккаунт? Регистрация'}
             </button>
           </div>
-
-          {!isRegister && (
-            <div className="default-creds">
-              <p><small>Default Admin: <strong>admin / admin123</strong></small></p>
-            </div>
-          )}
         </form>
 
         <div className="auth-footer">
-          <p>OBSERVE • CONTAIN • DEFEND</p>
+          <p>НАБЛЮДАЙ • СОДЕРЖИ • ЗАЩИЩАЙ</p>
         </div>
       </div>
     </div>
