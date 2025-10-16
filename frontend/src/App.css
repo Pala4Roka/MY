@@ -102,6 +102,23 @@ body {
   gap: 10px;
 }
 
+.profile-btn {
+  padding: 10px 20px;
+  background: rgba(59, 130, 246, 0.8);
+  border: 1px solid #3b82f6;
+  border-radius: 8px;
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.profile-btn:hover {
+  background: #3b82f6;
+  transform: translateY(-2px);
+  box-shadow: 0 0 15px rgba(59, 130, 246, 0.5);
+}
+
 .admin-btn {
   padding: 10px 20px;
   background: #dc2626;
