@@ -37,7 +37,7 @@ export default function HomePage({ onAdminClick }) {
       <header className="header">
         <div className="header-top">
           <div className="header-logo">
-            <img src="/assets/logo.png" alt="Eternal Sentinels Logo" className="logo" />
+            <ESLogo size="large" />
           </div>
           <div className="header-actions">
             {currentUser && currentUser.clearance_level >= 5 && (
