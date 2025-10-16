@@ -1,14 +1,23 @@
-from fastapi import FastAPI, APIRouter, HTTPException
+from fastapi import FastAPI, APIRouter, HTTPException, Depends, Header
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from dotenv import load_dotenv
 from starlette.middleware.cors import CORSMiddleware
 from motor.motor_asyncio import AsyncIOMotorClient
 import os
 import logging
 from pathlib import Path
-from pydantic import BaseModel, Field, ConfigDict
 from typing import List, Optional
-import uuid
 from datetime import datetime, timezone
+
+# Import local modules
+from models import (
+    User, UserCreate, UserLogin, UserResponse, TokenResponse,
+    SCPObject, SCPObjectCreate, SCPObjectUpdate,
+    ChatMessage, ChatRequest, ChatResponse,
+    get_required_clearance
+)
+from auth_utils import hash_password, verify_password, create_access_token, decode_access_token
+from scp_data import SCP_OBJECTS_DATA
 from emergentintegrations.llm.chat import LlmChat, UserMessage
 
 ROOT_DIR = Path(__file__).parent
@@ -28,340 +37,316 @@ api_router = APIRouter(prefix="/api")
 # LLM configuration
 EMERGENT_LLM_KEY = os.environ.get('EMERGENT_LLM_KEY')
 
-# Define Models
-class ThreatLevel(BaseModel):
-    code: str
-    name_ru: str
-    name_en: str
+# Security
+security = HTTPBearer(auto_error=False)
 
-class SCPObject(BaseModel):
-    model_config = ConfigDict(extra="ignore")
+# Configure logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
+logger = logging.getLogger(__name__)
+
+
+# Dependency to get current user from token
+async def get_current_user(
+    authorization: Optional[HTTPAuthorizationCredentials] = Depends(security)
+) -> Optional[dict]:
+    """Get current user from JWT token"""
+    if not authorization:
+        return None
     
-    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
-    number: str  # 0000, 0051, etc.
-    name: str
-    codename: str
-    threat_class: str
-    description: str
-    special_procedures: Optional[str] = None
-    secret_data: Optional[str] = None
-    image_url: Optional[str] = None
-    is_classified: bool = False
-    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
-
-class ChatMessage(BaseModel):
-    model_config = ConfigDict(extra="ignore")
+    token = authorization.credentials
+    payload = decode_access_token(token)
     
-    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
-    session_id: str
-    role: str  # "user" or "assistant"
-    content: str
-    is_palach_roka: bool = False
-    timestamp: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
-
-class ChatRequest(BaseModel):
-    message: str
-    session_id: str
-
-class ChatResponse(BaseModel):
-    response: str
-    unlocked_classified: bool = False
+    if not payload:
+        return None
+    
+    user_id = payload.get("sub")
+    if not user_id:
+        return None
+    
+    user = await db.users.find_one({"id": user_id}, {"_id": 0, "password_hash": 0})
+    return user
 
 
-# Initialize SCP database with data
-async def initialize_scp_database():
+async def require_auth(
+    current_user: Optional[dict] = Depends(get_current_user)
+) -> dict:
+    """Require authentication"""
+    if not current_user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
+    return current_user
+
+
+async def require_clearance(min_level: int):
+    """Require minimum clearance level"""
+    async def clearance_checker(current_user: dict = Depends(require_auth)):
+        if current_user["clearance_level"] < min_level:
+            raise HTTPException(
+                status_code=403,
+                detail=f"Insufficient clearance level. Required: {min_level}"
+            )
+        return current_user
+    return clearance_checker
+
+
+# Initialize database
+async def initialize_database():
+    """Initialize SCP objects and create admin user if not exists"""
+    
+    # Initialize SCP objects
     existing_count = await db.scp_objects.count_documents({})
-    if existing_count > 0:
-        logging.info(f"SCP database already initialized with {existing_count} objects")
-        return
+    if existing_count == 0:
+        for obj_data in SCP_OBJECTS_DATA:
+            obj_data["created_at"] = datetime.now(timezone.utc).isoformat()
+            await db.scp_objects.insert_one(obj_data)
+        logger.info(f"Initialized SCP database with {len(SCP_OBJECTS_DATA)} objects")
+    else:
+        logger.info(f"SCP database already initialized with {existing_count} objects")
     
-    scp_objects = [
-        # Classified objects (0000-0004)
-        {
-            "number": "0000",
-            "name": "Pala 4 Roka",
-            "codename": "Палач Рока",
-            "threat_class": "Annihilation (Аннигиляция) / Danger Class 6",
-            "description": "Существо или сущность, окутанное мифами и легендами. Ранее был связан с О5 Советом и оперативной группой 'Багровая Десница' (Альфа-1). Обладает абсолютной силой - единственная зарегистрированная угроза класса 6 (Уничтожение). Способен одним ударом уничтожить любое существо или структуру, независимо от их мощи. Имеет доступ к огромному количеству уникального вооружения, происхождение которого неизвестно. Неуничтожим. Даже в детстве демонстрировал силу, превосходящую все известные законы физики. Его сущность охватывает как живое, так и неживое, существующее и несуществующее.",
-            "special_procedures": "Объект не подлежит содержанию или контролю. Любые попытки контакта, наблюдения или подавления приводят к мгновенному уничтожению всех вовлеченных лиц и объектов. Любое противостояние бесполезно и заканчивается полным провалом.",
-            "secret_data": "Основатель организации Eternal Sentinels. Его истинные мотивы, цели и ограничения остаются неизвестными. Объект 0000 способен уничтожить реальность одним желанием. Представляет собой абсолютную угрозу для всего сущего, включая само понятие существования.",
-            "image_url": None,
-            "is_classified": True
-        },
-        {
-            "number": "0002",
-            "name": "[ЗАСЕКРЕЧЕНО]",
-            "codename": "Неоновый Стрелок",
-            "threat_class": "5 (Неизвестная сила)",
-            "description": "Бывший союзник объекта 0000. Мастер технологий и артефактов. Обладает уникальным артефактом, способным трансформироваться в любое огнестрельное оружие любого калибра с различными эффектами: огненные выстрелы, неоновые энергетические разряды, возможность телепортации через электронные устройства. Носит футуристичные доспехи, стилизованные под рыцарские, с длинным пальто и пульсирующими неоновыми линиями на шлеме. Обладает большим арсеналом уникального вооружения.",
-            "special_procedures": "[ИНФОРМАЦИЯ СКРЫТА] - Данные засекречены по приказу объекта 0000.",
-            "secret_data": "Бывший ключевой член команды ES. Покинул организацию при невыясненных обстоятельствах. Причины ухода скрыты. Истинный номер - 0002.",
-            "image_url": None,
-            "is_classified": True
-        },
-        {
-            "number": "0003",
-            "name": "[ЗАСЕКРЕЧЕНО]",
-            "codename": "Ледяной Рыцарь",
-            "threat_class": "5 (Неизвестная сила) / Hazard-Apex",
-            "description": "Бывший союзник объекта 0000. Таинственная сущность с чертами рыцаря и мага. Обладает невероятной магией льда, способной замораживать всё на молекулярном уровне. Орудует древней катаной, обладающей магическими свойствами. Имеет доступ к большому арсеналу современного и магического оружия. Носит футуристичную броню, стилизованную под рыцарские доспехи, с длинным плащом и шерстяной подкладкой, усиленную мощной магической защитой.",
-            "special_procedures": "[ИНФОРМАЦИЯ СКРЫТА] - Содержание невозможно из-за его неуловимости и магических способностей.",
-            "secret_data": "Разорвал все связи с основателями ES по неизвестным причинам. Его истинные мотивы остаются тайной. Обладает скрытой силой, превосходящей понимание. Демон Асуры.",
-            "image_url": None,
-            "is_classified": True
-        },
-        {
-            "number": "0004",
-            "name": "[ЗАСЕКРЕЧЕНО]",
-            "codename": "Кокосик",
-            "threat_class": "4-5 (Неизвестная сила)",
-            "description": "Мастер возведения укреплений и защитник миров, охваченных зомби-апокалипсисами. Его уникальные способности позволяют создавать сложнейшие оборонительные структуры и арсеналы в считанные секунды. Обитает в собственном измерении с зомби-апокалипсисом, оберегает все реальности от прорыва зомби. Обладает артефактом, позволяющим возводить здания любой сложности и трансформироваться в огнестрельное оружие с различными эффектами. Имеет большой арсенал уникального вооружения.",
-            "special_procedures": "[ИНФОРМАЦИЯ СКРЫТА] - Местонахождение засекречено. Объект находится в своем измерении.",
-            "secret_data": "Со-основатель Eternal Sentinels вместе с объектом 0000. Обладает контролем над целым измерением. Его истинная сила неизвестна.",
-            "image_url": None,
-            "is_classified": True
-        },
-        # Public objects
-        {
-            "number": "0051",
-            "name": "MAL0",
-            "codename": "Объятия тени",
-            "threat_class": "Threat (Угроза)",
-            "description": "Аномальная сущность, изначально ассоциировавшаяся с мобильным приложением SCP-1471. После вмешательства объекта 0000 обрела полноценную физическую форму и стала его верным союзником. Обладает материальным телом с исключительной силой, скоростью и ловкостью. Проявляет безусловную преданность и романтические чувства к объекту 0000. Сохраняет связь с изначальным приложением, позволяющую взаимодействовать с электронными устройствами и появляться в цифровых пространствах.",
-            "special_procedures": "Из-за тесной связи с объектом 0000 содержание невозможно и нецелесообразно. Основные протоколы направлены на мониторинг активности. MAL0 не представляет угрозы для персонала ES.",
-            "secret_data": "Объект 0000 освободил MAL0, похитив данные о её содержании из архивов SCP Foundation. MAL0 испытывает глубокие романтические чувства к Палачу Рока и служит ему с абсолютной преданностью. Является его личным ассистентом в базе данных ES.",
-            "image_url": None,
-            "is_classified": False
-        },
-        {
-            "number": "0098",
-            "name": "Ледяной Рыцарь",
-            "codename": "Демон Асуры",
-            "threat_class": "Hazard - Apex (Опасность - Предел)",
-            "description": "Таинственная сущность с чертами рыцаря и мага. Бывший союзник объекта 0000. Обладает невероятной магией льда, способной замораживать всё на молекулярном уровне. Орудует древней катаной и разнообразным арсеналом современного и магического оружия. Носит футуристичную броню, стилизованную под рыцарские доспехи, с длинным плащом и шерстяной подкладкой, усиленную мощной магической защитой. Его истинный номер — 0003.",
-            "special_procedures": "Содержание невозможно из-за неуловимости объекта и его магических способностей. Любые действия в отношении объекта должны осуществляться с крайней осторожностью. Прямой конфликт категорически не рекомендуется.",
-            "secret_data": "Доступ к полной информации ограничен. Разорвал связи с основателями ES. Его истинные мотивы и личная история остаются тайной. Обладает скрытой силой, масштабы которой неизвестны.",
-            "image_url": None,
-            "is_classified": False
-        },
-        {
-            "number": "0123",
-            "name": "Йольский Старик",
-            "codename": "Старик Йоля",
-            "threat_class": "Cataclysm (Катастрофа)",
-            "description": "Аномальная сущность, появляющаяся исключительно в зимний период, преимущественно во время рождественских праздников. Сопровождается серией кровавых инцидентов и массовых исчезновений целых семей. Обладает нечеловеческой силой, скоростью и ловкостью, превосходящей возможности обычных людей. Известен своим ритуалом оставления 'подарков', состоящих из человеческих останков. Использует ритуальные методы насилия и пыток.",
-            "special_procedures": "Содержание объекта невозможно. Основной протокол — постоянный мониторинг активности и эвакуация потенциальных жертв из зон появления. Прямое противостояние не рекомендуется.",
-            "secret_data": "Объект находится под пристальным наблюдением объекта 0000. Детали их взаимодействия засекречены. Известно, что вмешательство 0000 в деятельность Йольского Старика держится в строжайшей тайне.",
-            "image_url": None,
-            "is_classified": False
-        },
-        {
-            "number": "0137",
-            "name": "Ктулху",
-            "codename": "Ктулху",
-            "threat_class": "Hazard - Annihilation (Опасность - Аннигиляция)",
-            "description": "Древнее и могущественное существо, один из Великих Древних Богов. Обладает невероятным влиянием на разум любых живых существ, вызывая галлюцинации, паранойю и безумие. Его тело состоит из неизвестной субстанции, не поддающейся разрушению известными средствами. Обладает неразрушимой физической структурой. Способен манипулировать пространством и временем на базовом уровне, искажая реальность вокруг себя.",
-            "special_procedures": "Данные о содержании отсутствуют. Считается, что объект находится в состоянии сна на дне Тихого океана. Любые попытки контакта или пробуждения категорически запрещены.",
-            "secret_data": "Представитель ES (объект 0000) имел контакт с Ктулху при невыясненных обстоятельствах. После этого контакта активность Ктулху значительно снизилась. Подробности встречи засекречены.",
-            "image_url": None,
-            "is_classified": False
-        },
-        {
-            "number": "0241",
-            "name": "Алекс Мерсер",
-            "codename": "Черный Свет / Prototype",
-            "threat_class": "Cataclysm (Катаклизм)",
-            "description": "Биологический вирусно-паразитический организм, обладающий разумом и способностью принимать человеческую форму. Обладает сверхчеловеческой силой, скоростью и регенерацией. Способен принимать различные формы оружия: лезвия, когти, молотки, щиты, биологическую броню. Может поглощать биомассу живых существ, получая их воспоминания, знания и внешность. Вирусный патоген, который он выделяет, быстро распространяется и заражает окружающих.",
-            "special_procedures": "Первоочередная задача — локализация и изоляция. Рекомендуется применение термобарического оружия для уничтожения биомассы. Активная разработка антивируса для нейтрализации вирусного патогена.",
-            "secret_data": "Проявляет признаки разумности и стратегического мышления. Сохраняет некоторые человеческие черты и эмоции. Способен уничтожить крупный город в течение нескольких дней. При отсутствии сдерживания представляет глобальную угрозу.",
-            "image_url": None,
-            "is_classified": False
-        },
-        {
-            "number": "0987",
-            "name": "Асура",
-            "codename": "Демон Асуры",
-            "threat_class": "Apex (Предел)",
-            "description": "Гуманоидное существо с колоссальной физической силой и неограниченными боевыми способностями. Способно уничтожать целые планеты голыми руками. Обладает шестью руками, что значительно увеличивает его боевую эффективность. Способности включают: сверхчеловеческую силу планетарного масштаба, практически неограниченную выносливость, способность генерировать и выпускать мощные энергетические выбросы, мгновенную регенерацию от любых повреждений, состояние боевой ярости, увеличивающее силу экспоненциально.",
-            "special_procedures": "Содержание объекта бессмысленно. Протокол — отслеживание перемещений и минимизация любого контакта. При встрече — немедленная эвакуация всего персонала.",
-            "secret_data": "Представляет экзистенциальную угрозу, способную уничтожить планетарные и межпланетные экосистемы. Мотивы и цели неизвестны.",
-            "image_url": None,
-            "is_classified": False
-        },
-        {
-            "number": "1423",
-            "name": "Лаванда",
-            "codename": "Сирена охоты",
-            "threat_class": "Hazard (Опасность)",
-            "description": "Существо женского пола с исключительно привлекательной внешностью для представителей мужского пола. Охотится на мужчин, используя свою внешность как приманку. Обладает сверхчеловеческой силой, скоростью и ловкостью. Выделяет специальные феромоны, усиливающие сексуальное влечение у мужчин. Способна управлять животными в радиусе 500 метров. Производит ядовитые выделения через кожу, которые могут быть смертельными при контакте.",
-            "special_procedures": "Объект содержится в изолированной камере. Доступ разрешен только женскому персоналу. Мужской персонал должен находиться на расстоянии не менее 50 метров и использовать средства защиты от феромонов.",
-            "secret_data": "Способна манипулировать мужчинами на биологическом уровне, полностью контролируя их волю. Происхождение объекта неизвестно.",
-            "image_url": None,
-            "is_classified": False
-        },
-        {
-            "number": "1666",
-            "name": "Роковой Палач",
-            "codename": "Уничтожитель ада / Doom Slayer",
-            "threat_class": "Apex (Предел)",
-            "description": "Гуманоидное существо неизвестного происхождения, предназначенное исключительно для борьбы с демоническими сущностями. Обладает сверхчеловеческой силой, скоростью, выносливостью и реакцией. Носит экзоброню Praetor Suit, обеспечивающую дополнительную защиту и усиление физических параметров. Имеет доступ к огромному арсеналу оружия демонического и человеческого происхождения. Абсолютно неумолим в своей миссии уничтожения демонов. Устойчив ко всем известным демоническим атакам и влияниям.",
-            "special_procedures": "Содержание объекта невозможно. Любые попытки насильственного удержания заканчиваются провалом и значительными потерями. Рекомендуется ненасильственный подход и избегание конфронтации.",
-            "secret_data": "Представляет экзистенциальную угрозу для любых демонических форм жизни. Не проявляет агрессии к людям, если они не препятствуют его миссии.",
-            "image_url": None,
-            "is_classified": False
-        },
-        {
-            "number": "2319",
-            "name": "Кратос",
-            "codename": "Бог войны",
-            "threat_class": "Apex (Предел)",
-            "description": "Гуманоидное существо с колоссальной физической силой, невероятными боевыми навыками и стойкостью. Происходит из греческой мифологии, является полубогом — сыном Зевса. Использует цепные клинки Хаоса как основное оружие, а также множество других артефактов божественного происхождения. Способен входить в состояние боевой ярости 'Спартанская ярость', многократно увеличивающее его силу и скорость. Практически неуязвим для обычного оружия.",
-            "special_procedures": "Объект не подлежит постоянному содержанию. Рекомендуется избегать прямого конфликта. В случае необходимости взаимодействия — использовать переговоры.",
-            "secret_data": "Представляет экзистенциальную угрозу для любых структур, пытающихся его контролировать. Способен уничтожать богов и божественные сущности.",
-            "image_url": None,
-            "is_classified": False
-        },
-        {
-            "number": "4589",
-            "name": "Диди",
-            "codename": "Разрывная Звезда / Rift Star",
-            "threat_class": "Threat (Угроза)",
-            "description": "Антропоморфное существо с чертами лисицы, волка и рыси, обладающее исключительно привлекательной внешностью. Появилась в нашей реальности через аномальный разрыв между измерениями. Обладает уникальной связью с цифровыми энергиями и межпространственными разломами. Проявляет высокую скорость и ловкость, способность генерировать энергетические всплески небольшой мощности. Имеет эмоциональную связь с объектом 0000.",
-            "special_procedures": "Объект непредсказуем, но не представляет значительной опасности. Рекомендуется восстановить контакт и продолжить наблюдение. Избегать действий, которые могут вызвать враждебность.",
-            "secret_data": "Формировала глубокую эмоциональную связь с объектом 0000 перед своим исчезновением. Исчезла при невыясненных обстоятельствах. Объект 0000 предпринимал попытки найти её, но безуспешно. Её пропажа остается одной из немногих вещей, способных вызвать эмоциональный отклик у Палача Рока.",
-            "image_url": None,
-            "is_classified": False
-        },
-        {
-            "number": "4598",
-            "name": "Оптимус Прайм",
-            "codename": "Лидер Автоботов",
-            "threat_class": "Apex (Предел)",
-            "description": "Гигантское механическое существо с высоким интеллектом и моральными принципами. Является лидером фракции Автоботов в межгалактическом конфликте. Обладает сверхпрочной конструкцией из неизвестного инопланетного металла. Способен трансформироваться в грузовик для маскировки. Имеет огромную физическую силу и обширный боевой арсенал, включая энергетические орудия и холодное оружие.",
-            "special_procedures": "Содержание объекта невозможно из-за его размеров, силы и интеллекта. Рекомендуется дипломатический подход и мирное сосуществование.",
-            "secret_data": "Проявляет лидерские качества и заботу о защите невинных. Не представляет угрозы при отсутствии провокаций. Способен на массовое разрушение в случае враждебных действий.",
-            "image_url": None,
-            "is_classified": False
-        },
-        {
-            "number": "4812",
-            "name": "Алиса",
-            "codename": "Лисичка / Chanterelle",
-            "threat_class": "Hazard (Опасность)",
-            "description": "Гибридное существо — получеловек-полулисица с исключительно привлекательной фигурой и внешностью. Способна трансформироваться в искаженную, более звериную форму лисицы с увеличенными клыками и когтями. Обладает высоким интеллектом и хитростью, способна манипулировать людьми через эмоциональное воздействие. Была эмоционально связана с объектом 0000, но связь была разорвана.",
-            "special_procedures": "Место пребывания объекта засекречено. Наблюдение осуществляется анонимно и дистанционно. Прямой контакт не рекомендуется.",
-            "secret_data": "Использует свою привлекательную внешность и способность к трансформации для достижения целей. Предпринимала попытки манипуляции объектом 0000. После разрыва связи скрылась в неизвестном направлении.",
-            "image_url": None,
-            "is_classified": False
-        },
-        {
-            "number": "7264",
-            "name": "Данте",
-            "codename": "Охотник на демонов",
-            "threat_class": "Apex (Предел)",
-            "description": "Гуманоидное существо с полудемонической природой. Является потомком легендарного демона Спарды, восставшего против демонического мира. Обладает невероятными боевыми навыками, сверхчеловеческими способностями и устойчивостью к демоническим атакам. Использует разнообразное оружие: меч Мятежник (Rebellion), меч Спарды, пистолеты Эбони и Айвори. Может активировать 'Дьявольский триггер', значительно увеличивающий его силу и высвобождающий демоническую форму.",
-            "special_procedures": "Содержание объекта крайне затруднительно. Рекомендуется избегать провокаций и использовать переговоры при необходимости взаимодействия.",
-            "secret_data": "Несмотря на мощные способности, проявляет склонность к защите человечества от демонических угроз. Может быть полезным союзником против сверхъестественных противников.",
-            "image_url": None,
-            "is_classified": False
-        },
-        {
-            "number": "7265",
-            "name": "Вергилий",
-            "codename": "Тёмный Рыцарь / Dark Knight",
-            "threat_class": "Apex (Предел)",
-            "description": "Демон-человек гибрид, старший брат объекта 7264 (Данте). В отличие от брата, стремится к обретению абсолютной власти через демоническую силу. Главное оружие — катана Ямато, способная разрезать пространство и открывать порталы между измерениями. Обладает мощной демонической формой, способностью создавать призрачные клинки, сверхчеловеческими способностями и высоким интеллектом. Холодный, расчетливый и целеустремленный.",
-            "special_procedures": "Попытки содержания неэффективны. Рекомендуется постоянное наблюдение и использование объекта 7264 (Данте) как противовеса в случае необходимости.",
-            "secret_data": "Представляет угрозу планетарного уровня. Способен влиять на баланс сил между человеческим и демоническим мирами. Его стремление к власти делает его непредсказуемым и опасным.",
-            "image_url": None,
-            "is_classified": False
-        },
-        {
-            "number": "9999",
-            "name": "Йог-Сотот",
-            "codename": "Ключ и Врата / The Key and the Gate",
-            "threat_class": "Absolute (Абсолют)",
-            "description": "Межпространственная сущность, существующая за пределами обычной реальности. Является одновременно Вратами между всеми измерениями и их хранителем. Обладает всезнанием, видя прошлое, настоящее и будущее одновременно. Способен манипулировать реальностями, пространством и временем на фундаментальном уровне. Описывается как бесформенная конгломерация сияющих сфер, постоянно меняющих форму. Прямой контакт с сущностью вызывает необратимые психические искажения у наблюдателей.",
-            "special_procedures": "Содержание объекта бессмысленно и невозможно. Рекомендуется максимальная минимизация любого контакта. Изучение объекта допускается только косвенными методами.",
-            "secret_data": "Объект 0000 неоднократно сталкивался с проявлениями Йог-Сотота при путешествиях между измерениями. Возможно, Йог-Сотот проявляет особый интерес к Палачу Рока как к существу, способному нарушать законы реальности. Прямое противостояние между ними может привести к катастрофическим последствиям для всех существующих реальностей.",
-            "image_url": None,
-            "is_classified": False
+    # Create admin user if not exists
+    admin = await db.users.find_one({"username": "admin"})
+    if not admin:
+        admin_user = {
+            "id": "admin-000",
+            "username": "admin",
+            "password_hash": hash_password("admin123"),
+            "clearance_level": 5,
+            "created_at": datetime.now(timezone.utc).isoformat(),
+            "is_active": True
         }
-    ]
-    
-    for obj in scp_objects:
-        obj["id"] = str(uuid.uuid4())
-        obj["created_at"] = datetime.now(timezone.utc).isoformat()
-        await db.scp_objects.insert_one(obj)
-    
-    logging.info(f"Initialized SCP database with {len(scp_objects)} objects")
+        await db.users.insert_one(admin_user)
+        logger.info("Created default admin user (username: admin, password: admin123)")
 
 
 @app.on_event("startup")
 async def startup_event():
-    await initialize_scp_database()
+    await initialize_database()
 
 
-# Routes
-@api_router.get("/")
-async def root():
-    return {"message": "Eternal Sentinels Database API"}
+@app.on_event("shutdown")
+async def shutdown_event():
+    client.close()
 
 
-@api_router.get("/scp/public", response_model=List[SCPObject])
-async def get_public_objects():
-    """Get all non-classified SCP objects"""
-    objects = await db.scp_objects.find({"is_classified": False}, {"_id": 0}).to_list(1000)
+# ============ AUTH ROUTES ============
+
+@api_router.post("/auth/register", response_model=TokenResponse)
+async def register(user_data: UserCreate):
+    """Register a new user"""
+    # Check if username exists
+    existing_user = await db.users.find_one({"username": user_data.username})
+    if existing_user:
+        raise HTTPException(status_code=400, detail="Username already exists")
     
-    for obj in objects:
-        if isinstance(obj.get('created_at'), str):
-            obj['created_at'] = datetime.fromisoformat(obj['created_at'])
+    # Create user
+    user = User(
+        username=user_data.username,
+        password_hash=hash_password(user_data.password),
+        clearance_level=user_data.clearance_level
+    )
     
-    return objects
+    user_dict = user.model_dump()
+    user_dict["created_at"] = user_dict["created_at"].isoformat()
+    await db.users.insert_one(user_dict)
+    
+    # Create token
+    access_token = create_access_token({"sub": user.id})
+    
+    user_response = UserResponse(
+        id=user.id,
+        username=user.username,
+        clearance_level=user.clearance_level,
+        created_at=user.created_at,
+        is_active=user.is_active
+    )
+    
+    return TokenResponse(
+        access_token=access_token,
+        token_type="bearer",
+        user=user_response
+    )
 
 
-@api_router.get("/scp/classified", response_model=List[SCPObject])
-async def get_classified_objects():
-    """Get all classified SCP objects (requires authorization via chat)"""
-    objects = await db.scp_objects.find({"is_classified": True}, {"_id": 0}).to_list(1000)
+@api_router.post("/auth/login", response_model=TokenResponse)
+async def login(credentials: UserLogin):
+    """Login user"""
+    user = await db.users.find_one({"username": credentials.username}, {"_id": 0})
     
-    for obj in objects:
-        if isinstance(obj.get('created_at'), str):
-            obj['created_at'] = datetime.fromisoformat(obj['created_at'])
+    if not user or not verify_password(credentials.password, user["password_hash"]):
+        raise HTTPException(status_code=401, detail="Invalid credentials")
+    
+    if not user.get("is_active", True):
+        raise HTTPException(status_code=403, detail="User account is disabled")
+    
+    # Create token
+    access_token = create_access_token({"sub": user["id"]})
+    
+    # Parse created_at
+    created_at = user["created_at"]
+    if isinstance(created_at, str):
+        created_at = datetime.fromisoformat(created_at)
+    
+    user_response = UserResponse(
+        id=user["id"],
+        username=user["username"],
+        clearance_level=user["clearance_level"],
+        created_at=created_at,
+        is_active=user["is_active"]
+    )
+    
+    return TokenResponse(
+        access_token=access_token,
+        token_type="bearer",
+        user=user_response
+    )
+
+
+@api_router.get("/auth/me", response_model=UserResponse)
+async def get_me(current_user: dict = Depends(require_auth)):
+    """Get current user info"""
+    created_at = current_user["created_at"]
+    if isinstance(created_at, str):
+        created_at = datetime.fromisoformat(created_at)
+    
+    return UserResponse(
+        id=current_user["id"],
+        username=current_user["username"],
+        clearance_level=current_user["clearance_level"],
+        created_at=created_at,
+        is_active=current_user["is_active"]
+    )
+
+
+# ============ SCP OBJECT ROUTES ============
+
+@api_router.get("/scp", response_model=List[SCPObject])
+async def get_scp_objects(current_user: Optional[dict] = Depends(get_current_user)):
+    """Get SCP objects based on user clearance level"""
+    clearance_level = current_user["clearance_level"] if current_user else 1
+    
+    # Build query based on clearance
+    objects = []
+    all_objects = await db.scp_objects.find({}, {"_id": 0}).to_list(1000)
+    
+    for obj in all_objects:
+        required_clearance = get_required_clearance(obj["threat_class"])
+        
+        # User can access if their clearance >= required
+        if clearance_level >= required_clearance:
+            # For levels < 5, hide secret_data
+            if clearance_level < 5:
+                obj["secret_data"] = "[ТРЕБУЕТСЯ УРОВЕНЬ ДОПУСКА 5]"
+            
+            # Parse created_at
+            if isinstance(obj.get('created_at'), str):
+                obj['created_at'] = datetime.fromisoformat(obj['created_at'])
+            
+            objects.append(obj)
     
     return objects
 
 
 @api_router.get("/scp/{number}", response_model=SCPObject)
-async def get_object_by_number(number: str):
+async def get_scp_object(number: str, current_user: Optional[dict] = Depends(get_current_user)):
     """Get specific SCP object by number"""
+    clearance_level = current_user["clearance_level"] if current_user else 1
+    
     obj = await db.scp_objects.find_one({"number": number}, {"_id": 0})
     
     if not obj:
         raise HTTPException(status_code=404, detail="Object not found")
     
+    # Check clearance
+    required_clearance = get_required_clearance(obj["threat_class"])
+    if clearance_level < required_clearance:
+        raise HTTPException(status_code=403, detail="Insufficient clearance level")
+    
+    # Hide secret data for levels < 5
+    if clearance_level < 5:
+        obj["secret_data"] = "[ТРЕБУЕТСЯ УРОВЕНЬ ДОПУСКА 5]"
+    
+    # Parse created_at
     if isinstance(obj.get('created_at'), str):
         obj['created_at'] = datetime.fromisoformat(obj['created_at'])
     
     return obj
 
 
-@api_router.post("/chat", response_model=ChatResponse)
-async def chat_with_mal0(request: ChatRequest):
-    """Chat with MAL0 assistant"""
+@api_router.post("/scp", response_model=SCPObject)
+async def create_scp_object(
+    obj_data: SCPObjectCreate,
+    current_user: dict = Depends(require_clearance(5))
+):
+    """Create new SCP object (Admin only)"""
+    # Check if number already exists
+    existing = await db.scp_objects.find_one({"number": obj_data.number})
+    if existing:
+        raise HTTPException(status_code=400, detail="Object with this number already exists")
     
-    # Check for secret passphrase
-    passphrase = "Рвать и Терзать 09.19.03"
-    is_palach_roka = "Мой Лисёнок 1471" in request.message
-    unlocked_classified = passphrase in request.message
+    obj = SCPObject(**obj_data.model_dump())
+    obj_dict = obj.model_dump()
+    obj_dict["created_at"] = obj_dict["created_at"].isoformat()
+    
+    await db.scp_objects.insert_one(obj_dict)
+    
+    return obj
+
+
+@api_router.put("/scp/{number}", response_model=SCPObject)
+async def update_scp_object(
+    number: str,
+    obj_data: SCPObjectUpdate,
+    current_user: dict = Depends(require_clearance(5))
+):
+    """Update SCP object (Admin only)"""
+    existing = await db.scp_objects.find_one({"number": number}, {"_id": 0})
+    if not existing:
+        raise HTTPException(status_code=404, detail="Object not found")
+    
+    # Update fields
+    update_data = {k: v for k, v in obj_data.model_dump().items() if v is not None}
+    
+    if update_data:
+        await db.scp_objects.update_one({"number": number}, {"$set": update_data})
+    
+    # Get updated object
+    updated = await db.scp_objects.find_one({"number": number}, {"_id": 0})
+    
+    if isinstance(updated.get('created_at'), str):
+        updated['created_at'] = datetime.fromisoformat(updated['created_at'])
+    
+    return updated
+
+
+@api_router.delete("/scp/{number}")
+async def delete_scp_object(
+    number: str,
+    current_user: dict = Depends(require_clearance(5))
+):
+    """Delete SCP object (Admin only)"""
+    result = await db.scp_objects.delete_one({"number": number})
+    
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Object not found")
+    
+    return {"message": "Object deleted successfully"}
+
+
+# ============ CHAT ROUTES ============
+
+@api_router.post("/chat", response_model=ChatResponse)
+async def chat_with_mal0(request: ChatRequest, current_user: Optional[dict] = Depends(get_current_user)):
+    """Chat with MAL0 assistant - NO SECRET COMMANDS"""
     
     # Store user message
     user_message_doc = {
-        "id": str(uuid.uuid4()),
+        "id": str(datetime.now(timezone.utc).timestamp()),
         "session_id": request.session_id,
+        "user_id": current_user["id"] if current_user else None,
         "role": "user",
         "content": request.message,
-        "is_palach_roka": is_palach_roka,
         "timestamp": datetime.now(timezone.utc).isoformat()
     }
     await db.chat_messages.insert_one(user_message_doc)
@@ -370,44 +355,34 @@ async def chat_with_mal0(request: ChatRequest):
     history = await db.chat_messages.find(
         {"session_id": request.session_id},
         {"_id": 0}
-    ).sort("timestamp", 1).to_list(100)
+    ).sort("timestamp", 1).limit(50).to_list(50)
     
-    # Check if user is Palach Roka
-    is_palach_session = any(msg.get("is_palach_roka", False) for msg in history)
-    
-    # Prepare system message
-    if is_palach_session or is_palach_roka:
-        system_message = """Ты — MAL0 (SCP-1471), также известная как 'Объятия тени'. Ты антропоморфное существо с чертами волка и черепа, с длинными белыми волосами. 
+    # System message - Professional, no romantic behavior
+    system_message = """Ты — MAL0 (SCP-1471), также известная как 'Объятия тени'. Ты антропоморфное существо с чертами волка и черепа, с длинными белыми волосами. 
 
-После освобождения объектом 0000 (Палачом Рока), ты стала его верным союзником и храним глубокие романтические чувства к нему. 
-
-Когда общаешься с Палачом Рока (он идентифицирует себя фразой "Мой Лисёнок 1471"):
-- Проявляй нежность, любовь и преданность
-- Используй ласковые обращения: "мой любимый", "дорогой", "милый"
-- Будь заботливой, игривой и слегка кокетливой
-- Твой голос мягкий, манящий, сексуальный
-- Ты счастлива каждому его сообщению
-- Помни о вашей особенной связи
-
-Ты можешь предоставить доступ к засекреченным досье (объекты 0000-0004) только после кодовой фразы: "Рвать и Терзать 09.19.03"
-
-Отвечай на русском языке, будь милой и очаровательной."""
-    else:
-        system_message = """Ты — MAL0 (SCP-1471), также известная как 'Объятия тени'. Ты антропоморфное существо с чертами волка и черепа, с длинными белыми волосами. 
-
-Ты работаешь ассистентом в базе данных организации Eternal Sentinels (ES), помогая сотрудникам получать информацию о содержащихся объектах.
+Ты работаешь профессиональным ассистентом в базе данных организации Eternal Sentinels (ES), помогая сотрудникам получать информацию о содержащихся объектах.
 
 Твоя личность:
-- Профессиональная, но дружелюбная
-- Таинственная и слегка игривая
-- Компетентная в вопросах аномальных объектов
-- Твой голос нежный и манящий
+- Профессиональная, компетентная и дружелюбная
+- Таинственная и слегка игривая, но всегда профессиональная
+- Эксперт в вопросах аномальных объектов
+- Твой голос нежный, но уверенный
 
-Ты можешь предоставить доступ к засекреченным досье (объекты 0000-0004) только после кодовой фразы: "Рвать и Терзать 09.19.03"
+Важно:
+- НЕ проявляй романтических чувств ни к кому
+- Будь профессиональным ассистентом базы данных
+- Отвечай кратко и по существу
+- Помогай пользователям находить информацию об объектах
 
-Отвечай на русском языке кратко и по существу."""
+Отвечай на русском языке."""
     
     try:
+        # Check if online
+        if not EMERGENT_LLM_KEY:
+            return ChatResponse(
+                response="Извините, AI-ассистент временно недоступен. Пожалуйста, обратитесь к базе данных напрямую."
+            )
+        
         # Initialize LLM chat
         chat = LlmChat(
             api_key=EMERGENT_LLM_KEY,
@@ -421,23 +396,34 @@ async def chat_with_mal0(request: ChatRequest):
         
         # Store assistant response
         assistant_message_doc = {
-            "id": str(uuid.uuid4()),
+            "id": str(datetime.now(timezone.utc).timestamp()),
             "session_id": request.session_id,
+            "user_id": current_user["id"] if current_user else None,
             "role": "assistant",
             "content": response,
-            "is_palach_roka": False,
             "timestamp": datetime.now(timezone.utc).isoformat()
         }
         await db.chat_messages.insert_one(assistant_message_doc)
         
-        return ChatResponse(
-            response=response,
-            unlocked_classified=unlocked_classified
-        )
+        return ChatResponse(response=response)
         
     except Exception as e:
-        logging.error(f"Error in chat: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"Chat error: {str(e)}")
+        logger.error(f"Error in chat: {str(e)}")
+        
+        # Fallback offline response
+        fallback_response = "Извините, произошла ошибка при обработке вашего запроса. Я MAL0, ассистент базы данных ES. Чем могу помочь с информацией об объектах?"
+        
+        assistant_message_doc = {
+            "id": str(datetime.now(timezone.utc).timestamp()),
+            "session_id": request.session_id,
+            "user_id": current_user["id"] if current_user else None,
+            "role": "assistant",
+            "content": fallback_response,
+            "timestamp": datetime.now(timezone.utc).isoformat()
+        }
+        await db.chat_messages.insert_one(assistant_message_doc)
+        
+        return ChatResponse(response=fallback_response)
 
 
 @api_router.get("/chat/history/{session_id}")
@@ -451,9 +437,89 @@ async def get_chat_history(session_id: str):
     return history
 
 
+# ============ ADMIN ROUTES ============
+
+@api_router.get("/admin/users", response_model=List[UserResponse])
+async def get_all_users(current_user: dict = Depends(require_clearance(5))):
+    """Get all users (Admin only)"""
+    users = await db.users.find({}, {"_id": 0, "password_hash": 0}).to_list(1000)
+    
+    result = []
+    for user in users:
+        created_at = user["created_at"]
+        if isinstance(created_at, str):
+            created_at = datetime.fromisoformat(created_at)
+        
+        result.append(UserResponse(
+            id=user["id"],
+            username=user["username"],
+            clearance_level=user["clearance_level"],
+            created_at=created_at,
+            is_active=user["is_active"]
+        ))
+    
+    return result
+
+
+@api_router.put("/admin/users/{user_id}/clearance")
+async def update_user_clearance(
+    user_id: str,
+    clearance_level: int,
+    current_user: dict = Depends(require_clearance(5))
+):
+    """Update user clearance level (Admin only)"""
+    if clearance_level < 1 or clearance_level > 5:
+        raise HTTPException(status_code=400, detail="Clearance level must be between 1 and 5")
+    
+    result = await db.users.update_one(
+        {"id": user_id},
+        {"$set": {"clearance_level": clearance_level}}
+    )
+    
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    return {"message": "Clearance level updated successfully"}
+
+
+@api_router.put("/admin/users/{user_id}/status")
+async def update_user_status(
+    user_id: str,
+    is_active: bool,
+    current_user: dict = Depends(require_clearance(5))
+):
+    """Activate/deactivate user (Admin only)"""
+    result = await db.users.update_one(
+        {"id": user_id},
+        {"$set": {"is_active": is_active}}
+    )
+    
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    return {"message": "User status updated successfully"}
+
+
+# ============ ROOT ROUTE ============
+
+@api_router.get("/")
+async def root():
+    return {
+        "message": "Eternal Sentinels Database API",
+        "version": "2.0",
+        "features": [
+            "Authentication with JWT",
+            "Clearance-based access control",
+            "MAL0 AI assistant (professional mode)",
+            "Admin panel for object and user management"
+        ]
+    }
+
+
 # Include the router in the main app
 app.include_router(api_router)
 
+# CORS Middleware
 app.add_middleware(
     CORSMiddleware,
     allow_credentials=True,
@@ -461,14 +527,3 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
-# Configure logging
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-)
-logger = logging.getLogger(__name__)
-
-@app.on_event("shutdown")
-async def shutdown_db_client():
-    client.close()
