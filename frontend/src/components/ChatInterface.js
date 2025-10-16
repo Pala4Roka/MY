@@ -30,23 +30,30 @@ export default function ChatInterface({ sessionId, onUnlockClassified }) {
     const utterance = new SpeechSynthesisUtterance(text);
     const voices = synth.getVoices();
     
-    // Try to find the best female Russian voice
+    // Try to find the best female Russian voice with priority for natural sounding voices
     const femaleVoice = voices.find(voice => 
-      (voice.lang.includes('ru') && (
+      (voice.lang.includes('ru-RU') && (
+        voice.name.toLowerCase().includes('google') ||
+        voice.name.toLowerCase().includes('yandex') ||
         voice.name.toLowerCase().includes('female') ||
         voice.name.toLowerCase().includes('woman') ||
         voice.name.toLowerCase().includes('elena') ||
-        voice.name.toLowerCase().includes('milena')
+        voice.name.toLowerCase().includes('irina') ||
+        voice.name.toLowerCase().includes('milena') ||
+        voice.name.toLowerCase().includes('anna')
       ))
-    ) || voices.find(voice => 
-      voice.name.toLowerCase().includes('female') ||
-      voice.name.toLowerCase().includes('google') && voice.lang.includes('ru')
-    ) || voices.find(voice => voice.lang.includes('ru')) || voices[0];
+    ) || voices.find(voice => voice.lang.includes('ru-RU'))
+      || voices.find(voice => voice.lang.includes('ru')) 
+      || voices[0];
     
-    utterance.voice = femaleVoice;
-    utterance.rate = 0.85; // Slower for more sensual effect
-    utterance.pitch = 1.3; // Higher for femininity
-    utterance.volume = 0.9;
+    if (femaleVoice) {
+      utterance.voice = femaleVoice;
+    }
+    
+    // Настройки для сексуального, нежного, манящего голоса
+    utterance.rate = 0.8; // Медленнее для более чувственного эффекта
+    utterance.pitch = 1.15; // Немного выше для женственности, но не слишком высоко
+    utterance.volume = 1.0; // Полная громкость для четкости
     
     utterance.onstart = () => setIsSpeaking(true);
     utterance.onend = () => setIsSpeaking(false);
