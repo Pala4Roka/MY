@@ -64,7 +64,7 @@ export default function AdminPanel({ currentUser, onLogout }) {
   };
 
   const handleDeleteObject = async (number) => {
-    if (!window.confirm(`Delete object ${number}?`)) return;
+    if (!window.confirm(`Удалить объект ${number}?`)) return;
     
     try {
       await scpAPI.delete(number);
@@ -72,6 +72,87 @@ export default function AdminPanel({ currentUser, onLogout }) {
     } catch (err) {
       setError('Failed to delete object');
     }
+  };
+
+  const handleEditObject = (obj) => {
+    setEditingObject(obj);
+    setEditForm({
+      number: obj.number,
+      name: obj.name,
+      codename: obj.codename,
+      threat_class: obj.threat_class,
+      description: obj.description,
+      containment_procedures: obj.containment_procedures,
+      discovery_info: obj.discovery_info,
+      secret_data: obj.secret_data || ''
+    });
+  };
+
+  const handleSaveEdit = async () => {
+    try {
+      await scpAPI.update(editingObject.number, editForm);
+      setEditingObject(null);
+      setEditForm({});
+      fetchObjects();
+      setError('');
+    } catch (err) {
+      setError('Ошибка при сохранении изменений');
+    }
+  };
+
+  const handleCancelEdit = () => {
+    setEditingObject(null);
+    setEditForm({});
+  };
+
+  const handleDownloadDossier = (obj) => {
+    // Create a formatted text document
+    const content = `
+ETERNAL SENTINELS - ДОСЬЕ ОБЪЕКТА
+═══════════════════════════════════════
+
+ОБЪЕКТ: SCP-${obj.number}
+НАЗВАНИЕ: ${obj.name}
+КОДОВОЕ ИМЯ: "${obj.codename}"
+КЛАСС УГРОЗЫ: ${obj.threat_class}
+
+─────────────────────────────────────────
+
+ОПИСАНИЕ:
+${obj.description}
+
+─────────────────────────────────────────
+
+ПРОЦЕДУРЫ СОДЕРЖАНИЯ:
+${obj.containment_procedures}
+
+─────────────────────────────────────────
+
+ИНФОРМАЦИЯ ОБ ОБНАРУЖЕНИИ:
+${obj.discovery_info}
+
+${obj.secret_data && obj.secret_data !== '[ТРЕБУЕТСЯ УРОВЕНЬ ДОПУСКА 5]' ? `
+─────────────────────────────────────────
+
+[УРОВЕНЬ ДОПУСКА 5 - СЕКРЕТНАЯ ИНФОРМАЦИЯ]
+${obj.secret_data}
+` : ''}
+
+─────────────────────────────────────────
+Документ создан: ${new Date().toLocaleString('ru-RU')}
+Eternal Sentinels © 2025
+    `.trim();
+
+    // Create download
+    const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `SCP-${obj.number}_${obj.codename}_Dossier.txt`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
   };
 
   const getClearanceName = (level) => {
