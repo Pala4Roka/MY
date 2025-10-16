@@ -3,46 +3,28 @@ import { useNavigate } from 'react-router-dom';
 import { v4 as uuidv4 } from 'uuid';
 import ChatInterface from '../components/ChatInterface';
 import DossierList from '../components/DossierList';
-import axios from 'axios';
+import { scpAPI, getUser } from '../api';
 
-const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
-const API = `${BACKEND_URL}/api`;
-
-export default function HomePage() {
+export default function HomePage({ onAdminClick }) {
   const navigate = useNavigate();
   const [sessionId] = useState(() => uuidv4());
-  const [publicObjects, setPublicObjects] = useState([]);
-  const [classifiedObjects, setClassifiedObjects] = useState([]);
-  const [hasAccessToClassified, setHasAccessToClassified] = useState(false);
+  const [objects, setObjects] = useState([]);
   const [loading, setLoading] = useState(true);
+  const currentUser = getUser();
 
   useEffect(() => {
-    fetchPublicObjects();
+    fetchObjects();
   }, []);
 
-  const fetchPublicObjects = async () => {
+  const fetchObjects = async () => {
     try {
-      const response = await axios.get(`${API}/scp/public`);
-      setPublicObjects(response.data);
+      const data = await scpAPI.getAll();
+      setObjects(data);
       setLoading(false);
     } catch (error) {
-      console.error('Error fetching public objects:', error);
+      console.error('Error fetching objects:', error);
       setLoading(false);
     }
-  };
-
-  const fetchClassifiedObjects = async () => {
-    try {
-      const response = await axios.get(`${API}/scp/classified`);
-      setClassifiedObjects(response.data);
-      setHasAccessToClassified(true);
-    } catch (error) {
-      console.error('Error fetching classified objects:', error);
-    }
-  };
-
-  const handleUnlockClassified = () => {
-    fetchClassifiedObjects();
   };
 
   const handleObjectClick = (object) => {
@@ -52,25 +34,39 @@ export default function HomePage() {
   return (
     <>
       <header className="header">
-        <div className="header-logo">
-          <img src="/assets/logo.png" alt="Eternal Sentinels Logo" className="logo" />
+        <div className="header-top">
+          <div className="header-logo">
+            <img src="/assets/logo.png" alt="Eternal Sentinels Logo" className="logo" />
+          </div>
+          <div className="header-actions">
+            {currentUser && currentUser.clearance_level >= 5 && (
+              <button onClick={onAdminClick} className="admin-btn" data-testid="admin-btn">
+                🛡️ Админ-панель
+              </button>
+            )}
+          </div>
         </div>
         <h1 className="title">ETERNAL SENTINELS DATABASE</h1>
         <p className="subtitle">Observe • Contain • Defend</p>
+        {currentUser && (
+          <p className="user-info">
+            Вошел как: <strong>{currentUser.username}</strong> | Уровень допуска: <strong>{currentUser.clearance_level}</strong>
+          </p>
+        )}
       </header>
 
       {/* Chat Interface */}
       <ChatInterface 
-        sessionId={sessionId} 
-        onUnlockClassified={handleUnlockClassified}
+        sessionId={sessionId}
       />
 
       {/* Dossier List */}
       <div className="dossier-container">
         <DossierList 
-          objects={[...publicObjects, ...(hasAccessToClassified ? classifiedObjects : [])]}
+          objects={objects}
           onObjectClick={handleObjectClick}
           loading={loading}
+          currentUser={currentUser}
         />
       </div>
     </>
