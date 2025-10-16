@@ -28,12 +28,12 @@
 
 .chat-icon {
   font-size: 1.5rem;
-  animation: pulse 2s ease-in-out infinite;
+  animation: blink 3s ease-in-out infinite;
 }
 
-@keyframes pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.6; }
+@keyframes blink {
+  0%, 45%, 55%, 100% { opacity: 1; }
+  50% { opacity: 0.1; }
 }
 
 .chat-title h3 {
