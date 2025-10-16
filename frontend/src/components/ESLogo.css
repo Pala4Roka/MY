@@ -9,115 +9,47 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 10px;
+  gap: 15px;
 }
 
-.es-text {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  font-family: 'Orbitron', 'Courier New', monospace;
-  font-weight: 900;
-  position: relative;
+.es-logo-svg {
+  width: 150px;
+  height: 150px;
+  filter: drop-shadow(0 0 20px rgba(220, 38, 38, 0.5));
 }
 
-/* Size variations */
-.es-logo-container.large .es-text {
-  font-size: 80px;
+.es-logo-container.large .es-logo-svg {
+  width: 180px;
+  height: 180px;
 }
 
-.es-logo-container.medium .es-text {
-  font-size: 48px;
+.es-logo-container.medium .es-logo-svg {
+  width: 120px;
+  height: 120px;
 }
 
-.es-logo-container.small .es-text {
-  font-size: 32px;
-}
-
-/* Letters E and S */
-.es-letter {
-  color: #dc2626;
-  text-shadow: 
-    0 0 10px #dc2626,
-    0 0 20px #dc2626,
-    0 0 30px #dc2626,
-    0 0 40px #ff0000,
-    0 0 70px #ff0000,
-    0 0 80px #ff0000;
-  animation: neonPulse 2s ease-in-out infinite;
-  position: relative;
-  z-index: 1;
-}
-
-/* Eye in the middle */
-.es-eye {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 60px;
-  height: 60px;
-  border-radius: 50%;
-  background: radial-gradient(circle, #000 40%, transparent 40%);
-  border: 3px solid #3b82f6;
-  box-shadow: 
-    0 0 10px #3b82f6,
-    0 0 20px #3b82f6,
-    0 0 30px #3b82f6,
-    inset 0 0 20px #3b82f6;
-  animation: eyeBlink 4s ease-in-out infinite;
-  position: relative;
-  margin: 0 10px;
-}
-
-.es-logo-container.medium .es-eye {
-  width: 40px;
-  height: 40px;
-  margin: 0 8px;
-}
-
-.es-logo-container.small .es-eye {
-  width: 28px;
-  height: 28px;
-  margin: 0 5px;
-}
-
-.eye-pupil {
-  width: 20px;
-  height: 20px;
-  background: #3b82f6;
-  border-radius: 50%;
-  box-shadow: 
-    0 0 10px #3b82f6,
-    0 0 20px #3b82f6,
-    0 0 30px #60a5fa;
-  animation: pupilGlow 2s ease-in-out infinite;
-}
-
-.es-logo-container.medium .eye-pupil {
-  width: 14px;
-  height: 14px;
-}
-
-.es-logo-container.small .eye-pupil {
-  width: 10px;
-  height: 10px;
+.es-logo-container.small .es-logo-svg {
+  width: 80px;
+  height: 80px;
 }
 
 /* Subtitle */
 .es-subtitle {
-  font-size: 14px;
+  font-size: 16px;
   letter-spacing: 8px;
-  color: #dc2626;
+  color: #f0f0f0;
   text-shadow: 
     0 0 5px #dc2626,
-    0 0 10px #dc2626;
+    0 0 10px #dc2626,
+    0 0 15px #dc2626;
   font-family: 'Orbitron', 'Courier New', monospace;
-  font-weight: 600;
-  opacity: 0.9;
+  font-weight: 700;
+  opacity: 0.95;
+  animation: subtitlePulse 3s ease-in-out infinite;
 }
 
 .es-logo-container.medium .es-subtitle {
-  font-size: 10px;
+  font-size: 12px;
   letter-spacing: 5px;
 }
 
@@ -126,72 +58,55 @@
   letter-spacing: 3px;
 }
 
-/* Neon pulse animation for letters */
-@keyframes neonPulse {
+/* Code text below */
+.es-code {
+  font-size: 10px;
+  letter-spacing: 6px;
+  color: #dc2626;
+  text-shadow: 
+    0 0 5px #dc2626;
+  font-family: 'Courier New', monospace;
+  font-weight: 500;
+  opacity: 0.7;
+}
+
+.es-logo-container.medium .es-code {
+  font-size: 8px;
+  letter-spacing: 4px;
+}
+
+.es-logo-container.small .es-code {
+  font-size: 6px;
+  letter-spacing: 2px;
+}
+
+/* Subtitle pulse animation */
+@keyframes subtitlePulse {
   0%, 100% {
-    text-shadow: 
-      0 0 10px #dc2626,
-      0 0 20px #dc2626,
-      0 0 30px #dc2626,
-      0 0 40px #ff0000,
-      0 0 70px #ff0000,
-      0 0 80px #ff0000;
-    opacity: 1;
-  }
-  50% {
     text-shadow: 
       0 0 5px #dc2626,
       0 0 10px #dc2626,
+      0 0 15px #dc2626;
+    opacity: 0.95;
+  }
+  50% {
+    text-shadow: 
+      0 0 8px #dc2626,
       0 0 15px #dc2626,
-      0 0 20px #ff0000,
-      0 0 35px #ff0000,
-      0 0 40px #ff0000;
-    opacity: 0.8;
-  }
-}
-
-/* Eye blink animation */
-@keyframes eyeBlink {
-  0%, 48%, 52%, 100% {
+      0 0 25px #dc2626;
     opacity: 1;
-    transform: scaleY(1);
-  }
-  50% {
-    opacity: 0.3;
-    transform: scaleY(0.1);
-  }
-}
-
-/* Pupil glow animation */
-@keyframes pupilGlow {
-  0%, 100% {
-    box-shadow: 
-      0 0 10px #3b82f6,
-      0 0 20px #3b82f6,
-      0 0 30px #60a5fa;
-  }
-  50% {
-    box-shadow: 
-      0 0 20px #3b82f6,
-      0 0 40px #3b82f6,
-      0 0 60px #60a5fa,
-      0 0 80px #60a5fa;
   }
 }
 
 /* Responsive adjustments */
 @media (max-width: 768px) {
-  .es-logo-container.large .es-text {
-    font-size: 60px;
+  .es-logo-svg {
+    width: 120px;
+    height: 120px;
   }
   
-  .es-logo-container.large .es-eye {
-    width: 50px;
-    height: 50px;
-  }
-  
-  .es-logo-container.large .eye-pupil {
-    width: 16px;
-    height: 16px;
+  .es-subtitle {
+    font-size: 12px;
+    letter-spacing: 5px;
   }
 }
