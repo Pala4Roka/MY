@@ -40,6 +40,13 @@ export default function HomePage({ onAdminClick }) {
             <ESLogo size="large" />
           </div>
           <div className="header-actions">
+            <button 
+              onClick={() => navigate('/profile')} 
+              className="profile-btn"
+              title="Личный кабинет"
+            >
+              👤 Профиль
+            </button>
             {currentUser && currentUser.clearance_level >= 5 && (
               <button onClick={onAdminClick} className="admin-btn" data-testid="admin-btn">
                 🛡️ Админ-панель
@@ -48,7 +55,7 @@ export default function HomePage({ onAdminClick }) {
           </div>
         </div>
         <h1 className="title">ETERNAL SENTINELS DATABASE</h1>
-        <p className="subtitle">Observe • Contain • Defend</p>
+        <p className="subtitle">Наблюдай • Содержи • Защищай</p>
         {currentUser && (
           <p className="user-info">
             Вошел как: <strong>{currentUser.username}</strong> | Уровень допуска: <strong>{currentUser.clearance_level}</strong>
