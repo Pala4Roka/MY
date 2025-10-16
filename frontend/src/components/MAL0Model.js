@@ -217,7 +217,7 @@ export default function MAL0Model({ isTalking = false, emotion = 'idle' }) {
       }
       renderer.dispose();
     };
-  }, [isTalking]);
+  }, [isTalking, emotion]);
 
   if (error) {
     return (
