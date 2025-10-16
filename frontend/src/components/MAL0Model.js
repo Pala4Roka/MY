@@ -25,6 +25,65 @@ export default function MAL0Model({ isTalking = false, emotion = 'idle' }) {
   const animationIdRef = useRef(null);
   const emotionStateRef = useRef({ current: 'idle', time: 0 });
 
+  // Procedural animation function based on emotion
+  const applyEmotionAnimation = (model, emotion, elapsed, delta) => {
+    const state = emotionStateRef.current;
+    state.time += delta;
+
+    switch(emotion) {
+      case ANIMATION_STATES.IDLE:
+        // Subtle breathing and looking around
+        model.rotation.y = Math.sin(elapsed * 0.3) * 0.15;
+        model.position.y = -1.2 + Math.sin(elapsed * 0.8) * 0.05;
+        break;
+
+      case ANIMATION_STATES.NERVOUS:
+        // Quick, jittery movements
+        model.rotation.y = Math.sin(elapsed * 2) * 0.3 + Math.random() * 0.05;
+        model.position.y = -1.2 + Math.sin(elapsed * 4) * 0.1;
+        model.rotation.z = Math.sin(elapsed * 3) * 0.05;
+        break;
+
+      case ANIMATION_STATES.SLEEPY:
+        // Slow, drowsy swaying
+        model.rotation.y = Math.sin(elapsed * 0.15) * 0.1;
+        model.position.y = -1.2 + Math.sin(elapsed * 0.5) * 0.03;
+        model.rotation.z = Math.sin(elapsed * 0.2) * 0.08;
+        break;
+
+      case ANIMATION_STATES.SLEEPING:
+        // Minimal movement, gentle breathing
+        model.rotation.y = 0;
+        model.position.y = -1.3 + Math.sin(elapsed * 0.3) * 0.02;
+        model.rotation.z = 0;
+        break;
+
+      case ANIMATION_STATES.PLAYFUL:
+        // Energetic, bouncy movements
+        model.rotation.y = Math.sin(elapsed * 1.5) * 0.4;
+        model.position.y = -1.2 + Math.abs(Math.sin(elapsed * 2)) * 0.15;
+        model.rotation.x = Math.sin(elapsed * 1.2) * 0.05;
+        break;
+
+      case ANIMATION_STATES.HAPPY:
+        // Cheerful, slight head bobbing
+        model.rotation.y = Math.sin(elapsed * 1) * 0.25;
+        model.position.y = -1.2 + Math.sin(elapsed * 1.5) * 0.08;
+        model.rotation.z = Math.sin(elapsed * 1) * 0.03;
+        break;
+
+      default:
+        // Default idle
+        model.rotation.y = Math.sin(elapsed * 0.3) * 0.15;
+        model.position.y = -1.2 + Math.sin(elapsed * 0.8) * 0.05;
+    }
+
+    // Add talking animation overlay
+    if (isTalking) {
+      model.position.y += Math.sin(elapsed * 8) * 0.03;
+    }
+  };
+
   useEffect(() => {
     if (!mountRef.current) return;
 
@@ -33,39 +92,51 @@ export default function MAL0Model({ isTalking = false, emotion = 'idle' }) {
     scene.background = new THREE.Color(0x0a0a0a);
     sceneRef.current = scene;
 
-    // Camera setup
+    // Camera setup - positioned to show upper 50% of body, close-up like looking through window
     const camera = new THREE.PerspectiveCamera(
-      50,
+      45,
       mountRef.current.clientWidth / mountRef.current.clientHeight,
       0.1,
       1000
     );
-    camera.position.z = 5;
+    camera.position.set(0, 0.5, 2.5); // Closer, focused on upper body
+    camera.lookAt(0, 0.5, 0);
     cameraRef.current = camera;
 
     // Renderer setup
     const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
     renderer.setSize(mountRef.current.clientWidth, mountRef.current.clientHeight);
-    renderer.setPixelRatio(window.devicePixelRatio);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2)); // Limit for performance
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     mountRef.current.appendChild(renderer.domElement);
     rendererRef.current = renderer;
 
-    // Lights
-    const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+    // Enhanced lighting for dramatic effect
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.3);
     scene.add(ambientLight);
 
-    const spotLight = new THREE.SpotLight(0xffffff, 1);
-    spotLight.position.set(10, 10, 10);
+    // Main light (from front, slightly above)
+    const spotLight = new THREE.SpotLight(0xffffff, 1.5);
+    spotLight.position.set(0, 5, 5);
     spotLight.castShadow = true;
+    spotLight.angle = Math.PI / 4;
     scene.add(spotLight);
 
-    const pointLight = new THREE.PointLight(0xdc2626, 0.8);
-    pointLight.position.set(-10, -10, -10);
-    scene.add(pointLight);
+    // Red accent light (signature MAL0 color)
+    const redLight = new THREE.PointLight(0xdc2626, 1.2);
+    redLight.position.set(-3, 0, 2);
+    scene.add(redLight);
 
-    const pointLight2 = new THREE.PointLight(0x3b82f6, 0.6);
-    pointLight2.position.set(10, -10, 10);
-    scene.add(pointLight2);
+    // Blue accent light
+    const blueLight = new THREE.PointLight(0x3b82f6, 0.8);
+    blueLight.position.set(3, 0, 2);
+    scene.add(blueLight);
+
+    // Rim light for silhouette
+    const rimLight = new THREE.DirectionalLight(0xffffff, 0.5);
+    rimLight.position.set(0, 2, -3);
+    scene.add(rimLight);
 
     // Load GLTF Model
     const loader = new GLTFLoader();
@@ -74,9 +145,17 @@ export default function MAL0Model({ isTalking = false, emotion = 'idle' }) {
       (gltf) => {
         const model = gltf.scene;
         
-        // Adjust model scale and position
-        model.scale.set(1.2, 1.2, 1.2);
-        model.position.y = -1.5;
+        // Adjust model scale and position to show upper 50% close to "window"
+        model.scale.set(1.5, 1.5, 1.5);
+        model.position.set(0, -1.2, 0); // Position so upper body is centered
+        
+        // Apply shadows
+        model.traverse((child) => {
+          if (child.isMesh) {
+            child.castShadow = true;
+            child.receiveShadow = true;
+          }
+        });
         
         // Add model to scene
         scene.add(model);
@@ -88,15 +167,18 @@ export default function MAL0Model({ isTalking = false, emotion = 'idle' }) {
       },
       (progress) => {
         // Loading progress
-        const percent = (progress.loaded / progress.total) * 100;
-        console.log(`Loading MAL0 model: ${percent.toFixed(1)}%`);
+        if (progress.total > 0) {
+          const percent = (progress.loaded / progress.total) * 100;
+          setLoadProgress(percent);
+          console.log(`Loading MAL0 model: ${percent.toFixed(1)}%`);
+        }
       },
       (err) => {
         console.error('Error loading MAL0 model:', err);
         setError(true);
         setLoading(false);
       }
-    )
+    );
 
     // Animation loop
     const clock = new THREE.Clock();
@@ -106,15 +188,9 @@ export default function MAL0Model({ isTalking = false, emotion = 'idle' }) {
       const delta = clock.getDelta();
       const elapsed = clock.getElapsedTime();
 
-      // Rotate and animate model
+      // Apply emotion-based animation
       if (modelRef.current) {
-        if (isTalking) {
-          modelRef.current.rotation.y += delta * 0.5;
-          modelRef.current.position.y = -1.5 + Math.sin(elapsed * 3) * 0.15;
-        } else {
-          modelRef.current.rotation.y += delta * 0.2;
-          modelRef.current.position.y = -1.5 + Math.sin(elapsed * 0.8) * 0.1;
-        }
+        applyEmotionAnimation(modelRef.current, emotion, elapsed, delta);
       }
 
       renderer.render(scene, camera);
