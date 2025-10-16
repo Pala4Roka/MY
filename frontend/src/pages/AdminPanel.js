@@ -285,6 +285,20 @@ Eternal Sentinels © 2025
                       
                       <div className="object-actions">
                         <button 
+                          onClick={() => handleEditObject(obj)}
+                          className="edit-btn"
+                          data-testid={`edit-${obj.number}`}
+                        >
+                          Редактировать
+                        </button>
+                        <button 
+                          onClick={() => handleDownloadDossier(obj)}
+                          className="download-btn"
+                          data-testid={`download-${obj.number}`}
+                        >
+                          Скачать досье
+                        </button>
+                        <button 
                           onClick={() => handleDeleteObject(obj.number)}
                           className="delete-btn"
                           data-testid={`delete-${obj.number}`}
