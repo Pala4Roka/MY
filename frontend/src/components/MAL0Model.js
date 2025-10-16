@@ -191,7 +191,10 @@ export default function MAL0Model({ isTalking = false }) {
           zIndex: 10
         }}>
           <div style={{ fontSize: '48px' }}>👁</div>
-          <div>Инициализация MAL0...</div>
+          <div>Загрузка 3D модели MAL0...</div>
+          <div style={{ fontSize: '12px', opacity: 0.7, marginTop: '5px' }}>
+            Это может занять несколько секунд (121MB)
+          </div>
           <div style={{ 
             width: '200px', 
             height: '4px', 
