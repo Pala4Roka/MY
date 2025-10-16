@@ -223,12 +223,13 @@ export default function MAL0Model({ isTalking = false, emotion = 'idle' }) {
     return (
       <div style={{ 
         width: '100%', 
-        height: '400px', 
+        height: '100%',
+        minHeight: '300px',
         borderRadius: '12px', 
         overflow: 'hidden', 
-        background: '#0a0a0a',
+        background: 'linear-gradient(135deg, #0a0a0a 0%, #1a0a0a 100%)',
         border: '2px solid #dc2626',
-        boxShadow: '0 0 20px rgba(220, 38, 38, 0.3)',
+        boxShadow: '0 0 30px rgba(220, 38, 38, 0.4)',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
@@ -237,10 +238,12 @@ export default function MAL0Model({ isTalking = false, emotion = 'idle' }) {
         textAlign: 'center',
         padding: '20px'
       }}>
-        <div style={{ fontSize: '48px', marginBottom: '20px' }}>👁</div>
-        <h3 style={{ margin: '0 0 10px 0', color: '#dc2626' }}>MAL0 - Объятия тени</h3>
+        <div style={{ fontSize: '64px', marginBottom: '20px', filter: 'drop-shadow(0 0 10px #dc2626)' }}>👁</div>
+        <h3 style={{ margin: '0 0 10px 0', color: '#dc2626', fontSize: '24px', fontWeight: 'bold' }}>
+          MAL0 - Объятия тени
+        </h3>
         <p style={{ margin: '0', opacity: 0.7, fontSize: '14px' }}>
-          Ошибка инициализации модели
+          Ошибка загрузки 3D модели
         </p>
       </div>
     );
@@ -249,19 +252,21 @@ export default function MAL0Model({ isTalking = false, emotion = 'idle' }) {
   return (
     <div style={{ 
       width: '100%', 
-      height: '400px', 
+      height: '100%',
+      minHeight: '300px',
       borderRadius: '12px', 
       overflow: 'hidden', 
-      background: '#0a0a0a',
+      background: 'linear-gradient(135deg, #0a0a0a 0%, #1a0a0a 100%)',
       border: '2px solid #dc2626',
-      boxShadow: '0 0 20px rgba(220, 38, 38, 0.3)',
+      boxShadow: '0 0 30px rgba(220, 38, 38, 0.4)',
       position: 'relative'
     }}>
       <div 
         ref={mountRef} 
         style={{ 
           width: '100%', 
-          height: '100%' 
+          height: '100%',
+          minHeight: '300px'
         }}
       />
       {loading && (
@@ -271,37 +276,56 @@ export default function MAL0Model({ isTalking = false, emotion = 'idle' }) {
           left: '50%',
           transform: 'translate(-50%, -50%)',
           color: '#dc2626',
-          fontSize: '18px',
+          fontSize: '16px',
           textAlign: 'center',
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
           gap: '15px',
-          zIndex: 10
+          zIndex: 10,
+          background: 'rgba(10, 10, 10, 0.9)',
+          padding: '30px',
+          borderRadius: '12px',
+          border: '1px solid #dc2626',
+          boxShadow: '0 0 20px rgba(220, 38, 38, 0.3)'
         }}>
-          <div style={{ fontSize: '48px' }}>👁</div>
-          <div>Загрузка 3D модели MAL0...</div>
-          <div style={{ fontSize: '12px', opacity: 0.7, marginTop: '5px' }}>
-            Это может занять несколько секунд (121MB)
+          <div style={{ 
+            fontSize: '56px',
+            animation: 'pulse 2s ease-in-out infinite',
+            filter: 'drop-shadow(0 0 10px #dc2626)'
+          }}>👁</div>
+          <div style={{ fontWeight: 'bold', fontSize: '18px' }}>
+            Загрузка 3D модели MAL0...
+          </div>
+          <div style={{ fontSize: '12px', opacity: 0.7 }}>
+            {loadProgress > 0 ? `${loadProgress.toFixed(1)}%` : 'Инициализация...'}
           </div>
           <div style={{ 
-            width: '200px', 
-            height: '4px', 
-            background: 'rgba(220, 38, 38, 0.3)',
-            borderRadius: '2px',
-            overflow: 'hidden'
+            width: '250px', 
+            height: '6px', 
+            background: 'rgba(220, 38, 38, 0.2)',
+            borderRadius: '3px',
+            overflow: 'hidden',
+            border: '1px solid rgba(220, 38, 38, 0.4)'
           }}>
             <div style={{
-              width: '50%',
+              width: `${loadProgress}%`,
               height: '100%',
-              background: '#dc2626',
-              animation: 'loadingBar 1.5s ease-in-out infinite'
+              background: 'linear-gradient(90deg, #dc2626 0%, #ef4444 100%)',
+              transition: 'width 0.3s ease',
+              boxShadow: '0 0 10px #dc2626'
             }} />
           </div>
           <style>{`
-            @keyframes loadingBar {
-              0% { transform: translateX(-100%); }
-              100% { transform: translateX(300%); }
+            @keyframes pulse {
+              0%, 100% { 
+                transform: scale(1);
+                opacity: 1;
+              }
+              50% { 
+                transform: scale(1.1);
+                opacity: 0.8;
+              }
             }
           `}</style>
         </div>
@@ -309,20 +333,33 @@ export default function MAL0Model({ isTalking = false, emotion = 'idle' }) {
       {!loading && !error && (
         <div style={{
           position: 'absolute',
-          bottom: '20px',
+          bottom: '15px',
           left: '50%',
           transform: 'translateX(-50%)',
           color: '#dc2626',
-          fontSize: '12px',
+          fontSize: '11px',
           textAlign: 'center',
           opacity: 0.7,
-          background: 'rgba(10, 10, 10, 0.8)',
+          background: 'rgba(10, 10, 10, 0.85)',
           padding: '8px 16px',
           borderRadius: '6px',
-          border: '1px solid #dc2626'
+          border: '1px solid rgba(220, 38, 38, 0.5)',
+          backdropFilter: 'blur(5px)',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '2px'
         }}>
-          <div style={{ fontWeight: 'bold', marginBottom: '4px' }}>MAL0 - Объятия тени</div>
-          <div style={{ fontSize: '10px', opacity: 0.8 }}>3D модель загружена (121MB)</div>
+          <div style={{ fontWeight: 'bold', fontSize: '12px' }}>
+            MAL0 - Объятия тени
+          </div>
+          <div style={{ fontSize: '10px', opacity: 0.8 }}>
+            Состояние: {emotion === 'idle' ? 'Спокойное' : 
+                       emotion === 'nervous' ? 'Нервное' :
+                       emotion === 'sleepy' ? 'Сонное' :
+                       emotion === 'sleeping' ? 'Спящее' :
+                       emotion === 'playful' ? 'Игривое' :
+                       emotion === 'happy' ? 'Счастливое' : 'Активное'}
+          </div>
         </div>
       )}
     </div>
