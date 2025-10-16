@@ -5,7 +5,7 @@ import * as THREE from 'three';
 
 function Model({ isTalking }) {
   const group = useRef();
-  const { scene, animations } = useGLTF('/mal0_model.glb');
+  const { scene, animations } = useGLTF('/Mal0_Base_20.glb');
   const [mixer, setMixer] = useState(null);
 
   useEffect(() => {
