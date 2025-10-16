@@ -1,74 +1,76 @@
-import React, { useEffect, useState } from 'react';
+import React, { useRef, useEffect, useState, Suspense } from 'react';
+import { Canvas, useFrame } from '@react-three/fiber';
+import { useGLTF, OrbitControls, PerspectiveCamera, Environment } from '@react-three/drei';
 
-export default function MAL0Model({ isTalking = false }) {
-  const [rotation, setRotation] = useState(0);
+function Model({ isTalking }) {
+  const group = useRef();
+  const { scene, animations } = useGLTF('/Mal0_Base_20.glb');
+  const [mixer, setMixer] = useState(null);
 
   useEffect(() => {
-    if (isTalking) {
-      const interval = setInterval(() => {
-        setRotation((prev) => (prev + 5) % 360);
-      }, 50);
-      return () => clearInterval(interval);
+    if (scene && animations && animations.length > 0) {
+      const newMixer = new window.THREE.AnimationMixer(scene);
+      const action = newMixer.clipAction(animations[0]);
+      action.play();
+      setMixer(newMixer);
     }
-  }, [isTalking]);
+  }, [scene, animations]);
 
+  useFrame((state, delta) => {
+    if (mixer) mixer.update(delta);
+    
+    // Gentle idle animation
+    if (group.current && !isTalking) {
+      group.current.rotation.y += 0.002;
+      group.current.position.y = Math.sin(state.clock.elapsedTime) * 0.05;
+    }
+    
+    // Talking animation - more movement
+    if (group.current && isTalking) {
+      group.current.rotation.y += 0.005;
+      group.current.position.y = Math.sin(state.clock.elapsedTime * 3) * 0.1;
+    }
+  });
+
+  return (
+    <group ref={group}>
+      <primitive object={scene} scale={1.5} position={[0, -1, 0]} />
+    </group>
+  );
+}
+
+// Preload the model
+useGLTF.preload('/Mal0_Base_20.glb');
+
+export default function MAL0Model({ isTalking = false }) {
   return (
     <div style={{ 
       width: '100%', 
       height: '400px', 
       borderRadius: '12px', 
       overflow: 'hidden', 
-      background: 'linear-gradient(135deg, #1a1a1a, #2a2a2a)',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      position: 'relative',
+      background: '#0a0a0a',
       border: '2px solid #dc2626',
       boxShadow: '0 0 20px rgba(220, 38, 38, 0.3)'
     }}>
-      <div style={{
-        width: '300px',
-        height: '300px',
-        borderRadius: '50%',
-        background: 'radial-gradient(circle, rgba(220, 38, 38, 0.2), transparent)',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        animation: isTalking ? 'pulse 1s ease-in-out infinite' : 'float 3s ease-in-out infinite',
-        transform: `rotate(${rotation}deg)`
-      }}>
-        <img 
-          src="/Mal0_Base_20.glb"
-          alt="MAL0"
-          onError={(e) => {
-            e.target.style.display = 'none';
-            e.target.parentElement.innerHTML = `
-              <div style="color: #dc2626; font-size: 24px; text-align: center; font-family: 'Share Tech Mono', monospace;">
-                <div style="font-size: 48px; margin-bottom: 20px;">👁️</div>
-                <div>MAL0</div>
-                <div style="font-size: 16px; margin-top: 10px; opacity: 0.7;">Объятия тени</div>
-                ${isTalking ? '<div style="font-size: 14px; margin-top: 20px; color: #22c55e;">◉ Говорит...</div>' : '<div style="font-size: 14px; margin-top: 20px;">◉ Онлайн</div>'}
-              </div>
-            `;
-          }}
-          style={{ 
-            maxWidth: '100%', 
-            maxHeight: '100%',
-            objectFit: 'contain',
-            filter: 'drop-shadow(0 0 10px rgba(220, 38, 38, 0.5))'
-          }} 
+      <Canvas shadows dpr={[1, 2]}>
+        <PerspectiveCamera makeDefault position={[0, 0, 5]} fov={50} />
+        <ambientLight intensity={0.5} />
+        <spotLight position={[10, 10, 10]} angle={0.15} penumbra={1} intensity={1} castShadow />
+        <pointLight position={[-10, -10, -10]} intensity={0.5} />
+        <Environment preset="sunset" />
+        <Suspense fallback={null}>
+          <Model isTalking={isTalking} />
+        </Suspense>
+        <OrbitControls 
+          enableZoom={true}
+          enablePan={false}
+          minPolarAngle={Math.PI / 3}
+          maxPolarAngle={Math.PI / 2}
+          maxDistance={10}
+          minDistance={3}
         />
-      </div>
-      <style>{`
-        @keyframes pulse {
-          0%, 100% { transform: scale(1) rotate(${rotation}deg); }
-          50% { transform: scale(1.1) rotate(${rotation + 180}deg); }
-        }
-        @keyframes float {
-          0%, 100% { transform: translateY(0) rotate(${rotation}deg); }
-          50% { transform: translateY(-10px) rotate(${rotation}deg); }
-        }
-      `}</style>
+      </Canvas>
     </div>
   );
 }
