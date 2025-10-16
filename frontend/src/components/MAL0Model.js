@@ -73,26 +73,23 @@ export default function MAL0Model({ isTalking = false }) {
       overflow: 'hidden', 
       background: '#0a0a0a',
       border: '2px solid #dc2626',
-      boxShadow: '0 0 20px rgba(220, 38, 38, 0.3)'
+      boxShadow: '0 0 20px rgba(220, 38, 38, 0.3)',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      flexDirection: 'column',
+      color: '#dc2626',
+      textAlign: 'center',
+      padding: '20px'
     }}>
-      <Canvas shadows dpr={[1, 2]}>
-        <PerspectiveCamera makeDefault position={[0, 0, 5]} fov={50} />
-        <ambientLight intensity={0.5} />
-        <spotLight position={[10, 10, 10]} angle={0.15} penumbra={1} intensity={1} castShadow />
-        <pointLight position={[-10, -10, -10]} intensity={0.5} />
-        <Environment preset="sunset" />
-        <Suspense fallback={null}>
-          <Model isTalking={isTalking} />
-        </Suspense>
-        <OrbitControls 
-          enableZoom={true}
-          enablePan={false}
-          minPolarAngle={Math.PI / 3}
-          maxPolarAngle={Math.PI / 2}
-          maxDistance={10}
-          minDistance={3}
-        />
-      </Canvas>
+      <div style={{ fontSize: '48px', marginBottom: '20px' }}>👁</div>
+      <h3 style={{ margin: '0 0 10px 0', color: '#dc2626' }}>MAL0 - Объятия тени</h3>
+      <p style={{ margin: '0', opacity: 0.7, fontSize: '14px' }}>
+        {isTalking ? 'Говорит...' : '3D модель временно недоступна'}
+      </p>
+      <p style={{ margin: '10px 0 0 0', opacity: 0.5, fontSize: '12px' }}>
+        (121MB модель загружается...)
+      </p>
     </div>
   );
 }
