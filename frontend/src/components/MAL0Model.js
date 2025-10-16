@@ -233,7 +233,7 @@ export default function MAL0Model({ isTalking = false }) {
           border: '1px solid #dc2626'
         }}>
           <div style={{ fontWeight: 'bold', marginBottom: '4px' }}>MAL0 - Объятия тени</div>
-          <div style={{ fontSize: '10px', opacity: 0.8 }}>3D визуализация активна</div>
+          <div style={{ fontSize: '10px', opacity: 0.8 }}>3D модель загружена (121MB)</div>
         </div>
       )}
     </div>
