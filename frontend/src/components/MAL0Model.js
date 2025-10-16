@@ -207,7 +207,7 @@ export default function MAL0Model({ isTalking = false }) {
         <div style={{ fontSize: '48px', marginBottom: '20px' }}>👁</div>
         <h3 style={{ margin: '0 0 10px 0', color: '#dc2626' }}>MAL0 - Объятия тени</h3>
         <p style={{ margin: '0', opacity: 0.7, fontSize: '14px' }}>
-          Ошибка загрузки 3D модели
+          Ошибка инициализации модели
         </p>
       </div>
     );
@@ -243,10 +243,11 @@ export default function MAL0Model({ isTalking = false }) {
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
-          gap: '15px'
+          gap: '15px',
+          zIndex: 10
         }}>
           <div style={{ fontSize: '48px' }}>👁</div>
-          <div>Загрузка 3D модели MAL0...</div>
+          <div>Инициализация MAL0...</div>
           <div style={{ 
             width: '200px', 
             height: '4px', 
@@ -267,6 +268,25 @@ export default function MAL0Model({ isTalking = false }) {
               100% { transform: translateX(300%); }
             }
           `}</style>
+        </div>
+      )}
+      {!loading && !error && (
+        <div style={{
+          position: 'absolute',
+          bottom: '20px',
+          left: '50%',
+          transform: 'translateX(-50%)',
+          color: '#dc2626',
+          fontSize: '12px',
+          textAlign: 'center',
+          opacity: 0.7,
+          background: 'rgba(10, 10, 10, 0.8)',
+          padding: '8px 16px',
+          borderRadius: '6px',
+          border: '1px solid #dc2626'
+        }}>
+          <div style={{ fontWeight: 'bold', marginBottom: '4px' }}>MAL0 - Объятия тени</div>
+          <div style={{ fontSize: '10px', opacity: 0.8 }}>3D визуализация активна</div>
         </div>
       )}
     </div>
