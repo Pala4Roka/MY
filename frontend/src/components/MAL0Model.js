@@ -97,11 +97,10 @@ export default function MAL0Model({ isTalking = false }) {
       if (modelRef.current) {
         if (isTalking) {
           modelRef.current.rotation.y += delta * 0.5;
-          modelRef.current.position.y = Math.sin(elapsed * 3) * 0.15;
-          modelRef.current.scale.setScalar(1 + Math.sin(elapsed * 4) * 0.05);
+          modelRef.current.position.y = -1.5 + Math.sin(elapsed * 3) * 0.15;
         } else {
           modelRef.current.rotation.y += delta * 0.2;
-          modelRef.current.position.y = Math.sin(elapsed * 0.8) * 0.1;
+          modelRef.current.position.y = -1.5 + Math.sin(elapsed * 0.8) * 0.1;
         }
       }
 
