@@ -103,6 +103,185 @@
 #====================================================================================================
 
 user_problem_statement: |
+  Протестировать frontend SCP Foundation приложения после успешного backend тестирования.
+  Backend уже протестирован - все 11 API тестов пройдены (JWT auth, 21 SCP объект, MAL0 AI чат, админ-панель).
+  Нужно автоматически протестировать frontend: вход в систему, отображение объектов, 3D модель MAL0, чат с AI, админ-панель.
+  Креденшалы: admin/admin123, clearance level 5.
+
+backend:
+  - task: "JWT Authentication API"
+    implemented: true
+    working: true
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "user"
+        comment: "Backend протестирован пользователем - все 11 API тестов пройдены успешно"
+
+  - task: "SCP Objects Database (21 objects)"
+    implemented: true
+    working: true
+    file: "/app/backend/scp_data.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "user"
+        comment: "База данных с 21 SCP объектом работает корректно"
+
+  - task: "MAL0 AI Chat Integration (gpt-4o-mini)"
+    implemented: true
+    working: true
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "user"
+        comment: "AI чат с MAL0 работает профессионально, без романтики, использует emergentintegrations с gpt-4o-mini"
+
+  - task: "Admin Panel API (user & object management)"
+    implemented: true
+    working: true
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "user"
+        comment: "Админ-панель API работает корректно - управление пользователями и объектами"
+
+  - task: "Clearance Level System"
+    implemented: true
+    working: true
+    file: "/app/backend/models.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "user"
+        comment: "Система clearance levels работает правильно"
+
+frontend:
+  - task: "Login Page (JWT Auth)"
+    implemented: true
+    working: "NA"
+    file: "/app/frontend/src/pages/LoginPage.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Нужно протестировать вход в систему с креденшалами admin/admin123"
+
+  - task: "SCP Objects Display List"
+    implemented: true
+    working: "NA"
+    file: "/app/frontend/src/components/DossierList.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Нужно проверить отображение 21 SCP объекта на главной странице"
+
+  - task: "MAL0 3D Model Display"
+    implemented: true
+    working: "NA"
+    file: "/app/frontend/src/components/MAL0Model.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Нужно проверить загрузку и отображение 3D модели MAL0 (121MB glb файл)"
+
+  - task: "AI Chat Interface with MAL0"
+    implemented: true
+    working: "NA"
+    file: "/app/frontend/src/components/ChatInterface.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Нужно протестировать чат с MAL0 AI - отправка сообщений и получение ответов"
+
+  - task: "Admin Panel UI"
+    implemented: true
+    working: "NA"
+    file: "/app/frontend/src/pages/AdminPanel.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Нужно проверить доступ к админ-панели и управление пользователями/объектами"
+
+  - task: "Dossier Detail Page"
+    implemented: true
+    working: "NA"
+    file: "/app/frontend/src/pages/DossierDetailPage.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Нужно проверить отображение детальной информации об SCP объектах"
+
+metadata:
+  created_by: "main_agent"
+  version: "1.0"
+  test_sequence: 0
+  run_ui: true
+
+test_plan:
+  current_focus:
+    - "Login Page (JWT Auth)"
+    - "SCP Objects Display List"
+    - "MAL0 3D Model Display"
+    - "AI Chat Interface with MAL0"
+    - "Admin Panel UI"
+    - "Dossier Detail Page"
+  stuck_tasks: []
+  test_all: true
+  test_priority: "sequential"
+
+agent_communication:
+  - agent: "main"
+    message: |
+      Backend полностью протестирован пользователем - все работает отлично.
+      Готов к автоматическому тестированию frontend.
+      
+      Технические детали:
+      - Backend URL: https://scp-foundation.preview.emergentagent.com/api
+      - Креденшалы для тестирования: admin/admin123 (clearance level 5)
+      - 3D модель MAL0: /app/frontend/public/Mal0_Base_20.glb (121MB)
+      - AI Chat: использует emergentintegrations с gpt-4o-mini
+      - База данных: 21 SCP объект в MongoDB
+      
+      Необходимо протестировать:
+      1. Вход в систему (login page)
+      2. Отображение списка SCP объектов
+      3. Загрузку и отображение 3D модели MAL0
+      4. Работу AI чата с MAL0
+      5. Доступ к админ-панели
+      6. Детальное отображение информации об объектах
+
+user_problem_statement: |
   Доработка SCP сайта Eternal Sentinels:
   1. Интегрировать 3D модель MAL0 (Mal0_Base_20.glb)
   2. Обновить досье объектов из документа (добавить объекты 0002, 0003, 0004, 0042, 0047)
