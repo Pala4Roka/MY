@@ -77,4 +77,14 @@ agenthub/agents/youtube/db
 .cache/
 
 # Mobile development
-android-sdk/ 
+android-sdk/ Mal0_Base_20.glb
+Mal0_Base_20.glb
+frontend/public/Mal0_Base_20.glb
+frontend/node_modules/.cache/default-development/3.pack
+frontend/node_modules/.cache/default-development/0.pack
+frontend/node_modules/.cache/default-development/2.pack
+-e 
+# Environment files
+*.env
+*.env.*
+frontend/node_modules/.cache/default-development/4.pack
