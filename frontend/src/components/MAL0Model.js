@@ -39,7 +39,7 @@ function Model({ isTalking }) {
 }
 
 // Preload the model
-useGLTF.preload('/mal0_model.glb');
+useGLTF.preload('/Mal0_Base_20.glb');
 
 export default function MAL0Model({ isTalking = false }) {
   return (
