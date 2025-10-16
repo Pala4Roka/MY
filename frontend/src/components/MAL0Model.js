@@ -5,8 +5,19 @@ import * as THREE from 'three';
 
 function Model({ isTalking }) {
   const group = useRef();
-  const { scene, animations } = useGLTF('/Mal0_Base_20.glb');
+  const [modelError, setModelError] = useState(false);
   const [mixer, setMixer] = useState(null);
+  
+  // Try to load the model with error handling
+  let scene, animations;
+  try {
+    const gltf = useGLTF('/Mal0_Base_20.glb');
+    scene = gltf.scene;
+    animations = gltf.animations;
+  } catch (error) {
+    console.error('Error loading MAL0 model:', error);
+    setModelError(true);
+  }
 
   useEffect(() => {
     if (scene && animations && animations.length > 0) {
@@ -30,6 +41,18 @@ function Model({ isTalking }) {
       group.current.position.y = Math.sin(state.clock.elapsedTime * 3) * 0.1;
     }
   });
+
+  // If model failed to load or scene is null, show a fallback
+  if (modelError || !scene) {
+    return (
+      <group ref={group}>
+        <mesh>
+          <boxGeometry args={[1, 2, 1]} />
+          <meshStandardMaterial color="#dc2626" />
+        </mesh>
+      </group>
+    );
+  }
 
   return (
     <group ref={group}>
