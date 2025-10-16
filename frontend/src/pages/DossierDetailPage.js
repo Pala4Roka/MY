@@ -1,11 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import { scpAPI } from '../api';
 import jsPDF from 'jspdf';
 import './DossierDetailPage.css';
-
-const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
-const API = `${BACKEND_URL}/api`;
 
 export default function DossierDetailPage() {
   const { number } = useParams();
@@ -13,6 +10,7 @@ export default function DossierDetailPage() {
   const [object, setObject] = useState(null);
   const [loading, setLoading] = useState(true);
   const [exporting, setExporting] = useState(false);
+  const [error, setError] = useState('');
 
   useEffect(() => {
     fetchObject();
@@ -20,11 +18,16 @@ export default function DossierDetailPage() {
 
   const fetchObject = async () => {
     try {
-      const response = await axios.get(`${API}/scp/${number}`);
-      setObject(response.data);
+      const data = await scpAPI.getByNumber(number);
+      setObject(data);
       setLoading(false);
     } catch (error) {
       console.error('Error fetching object:', error);
+      if (error.response?.status === 403) {
+        setError('Недостаточный уровень допуска для просмотра этого объекта');
+      } else {
+        setError('Ошибка загрузки объекта');
+      }
       setLoading(false);
     }
   };
