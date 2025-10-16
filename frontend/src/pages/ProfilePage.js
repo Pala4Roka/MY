@@ -14,7 +14,7 @@ export default function ProfilePage({ user }) {
   }, []);
 
   const fetchUserData = async () => {
-    try:
+    try {
       setLoading(true);
       const data = await authAPI.getMe();
       setUserData(data);
