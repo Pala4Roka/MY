@@ -8,6 +8,8 @@ export default function AdminPanel({ currentUser, onLogout }) {
   const [objects, setObjects] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [editingObject, setEditingObject] = useState(null);
+  const [editForm, setEditForm] = useState({});
 
   useEffect(() => {
     if (activeTab === 'users') {
