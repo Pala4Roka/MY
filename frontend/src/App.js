@@ -5,6 +5,7 @@ import HomePage from './pages/HomePage';
 import DossierDetailPage from './pages/DossierDetailPage';
 import LoginPage from './pages/LoginPage';
 import AdminPanel from './pages/AdminPanel';
+import ProfilePage from './pages/ProfilePage';
 import { getUser, removeToken, removeUser, authAPI } from './api';
 
 function App() {
@@ -88,6 +89,12 @@ function App() {
                 ) : (
                   <Navigate to="/login" />
                 )
+              }
+            />
+            <Route
+              path="/profile"
+              element={
+                user ? <ProfilePage user={user} /> : <Navigate to="/login" />
               }
             />
             <Route
