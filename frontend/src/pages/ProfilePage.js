@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { authAPI } from '../api';
 import './ProfilePage.css';
 
 export default function ProfilePage({ user }) {
+  const navigate = useNavigate();
   const [userData, setUserData] = useState(user);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
@@ -12,7 +14,7 @@ export default function ProfilePage({ user }) {
   }, []);
 
   const fetchUserData = async () => {
-    try {
+    try:
       setLoading(true);
       const data = await authAPI.getMe();
       setUserData(data);
@@ -56,6 +58,13 @@ export default function ProfilePage({ user }) {
   return (
     <div className="profile-page">
       <div className="profile-container">
+        <button 
+          className="back-button"
+          onClick={() => navigate('/')}
+        >
+          ← Вернуться на главную
+        </button>
+        
         <div className="profile-header">
           <div className="profile-avatar">
             <div className="avatar-icon">👤</div>
