@@ -79,7 +79,7 @@ async def require_auth(
     return current_user
 
 
-async def require_clearance(min_level: int):
+def require_clearance(min_level: int):
     """Require minimum clearance level"""
     async def clearance_checker(current_user: dict = Depends(require_auth)):
         if current_user["clearance_level"] < min_level:
