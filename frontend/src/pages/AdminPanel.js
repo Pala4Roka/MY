@@ -349,6 +349,99 @@ Eternal Sentinels © 2025
           </>
         )}
       </div>
+
+      {/* Edit Modal */}
+      {editingObject && (
+        <div className="modal-overlay" onClick={handleCancelEdit}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h2>Редактировать SCP-{editingObject.number}</h2>
+              <button className="modal-close" onClick={handleCancelEdit}>✕</button>
+            </div>
+            
+            <div className="modal-body">
+              <div className="form-group">
+                <label>Название:</label>
+                <input
+                  type="text"
+                  value={editForm.name}
+                  onChange={(e) => setEditForm({...editForm, name: e.target.value})}
+                />
+              </div>
+
+              <div className="form-group">
+                <label>Кодовое имя:</label>
+                <input
+                  type="text"
+                  value={editForm.codename}
+                  onChange={(e) => setEditForm({...editForm, codename: e.target.value})}
+                />
+              </div>
+
+              <div className="form-group">
+                <label>Класс угрозы:</label>
+                <select
+                  value={editForm.threat_class}
+                  onChange={(e) => setEditForm({...editForm, threat_class: e.target.value})}
+                >
+                  <option value="Threat">Threat - Угроза</option>
+                  <option value="Hazard">Hazard - Опасность</option>
+                  <option value="Cataclysm">Cataclysm - Катаклизм</option>
+                  <option value="Collapse">Collapse - Крушение</option>
+                  <option value="Apex">Apex - Предел</option>
+                  <option value="Absolute">Absolute - Абсолют</option>
+                  <option value="Annihilation">Annihilation - Аннигиляция</option>
+                </select>
+              </div>
+
+              <div className="form-group">
+                <label>Описание:</label>
+                <textarea
+                  value={editForm.description}
+                  onChange={(e) => setEditForm({...editForm, description: e.target.value})}
+                  rows="4"
+                />
+              </div>
+
+              <div className="form-group">
+                <label>Процедуры содержания:</label>
+                <textarea
+                  value={editForm.containment_procedures}
+                  onChange={(e) => setEditForm({...editForm, containment_procedures: e.target.value})}
+                  rows="4"
+                />
+              </div>
+
+              <div className="form-group">
+                <label>Информация об обнаружении:</label>
+                <textarea
+                  value={editForm.discovery_info}
+                  onChange={(e) => setEditForm({...editForm, discovery_info: e.target.value})}
+                  rows="4"
+                />
+              </div>
+
+              <div className="form-group">
+                <label>Секретная информация (Уровень 5):</label>
+                <textarea
+                  value={editForm.secret_data}
+                  onChange={(e) => setEditForm({...editForm, secret_data: e.target.value})}
+                  rows="3"
+                />
+              </div>
+            </div>
+
+            <div className="modal-footer">
+              <button className="btn-cancel" onClick={handleCancelEdit}>
+                Отмена
+              </button>
+              <button className="btn-save" onClick={handleSaveEdit}>
+                Сохранить изменения
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
