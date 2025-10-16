@@ -1,19 +1,24 @@
-import React, { useRef, useEffect, useState } from 'react';
+import React, { useRef, useEffect, useState, Suspense } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
 import { useGLTF, OrbitControls, PerspectiveCamera } from '@react-three/drei';
 import * as THREE from 'three';
 
 function Model({ isTalking }) {
   const group = useRef();
-  const { scene, animations } = useGLTF('/Mal0_Base_20.glb');
-  const [mixer] = useState(() => new THREE.AnimationMixer(scene));
+  const gltf = useGLTF('/Mal0_Base_20.glb');
+  const [mixer] = useState(() => {
+    if (gltf.animations && gltf.animations.length > 0) {
+      return new THREE.AnimationMixer(gltf.scene);
+    }
+    return null;
+  });
 
   useEffect(() => {
-    if (animations && animations.length > 0) {
-      const action = mixer.clipAction(animations[0]);
+    if (mixer && gltf.animations && gltf.animations.length > 0) {
+      const action = mixer.clipAction(gltf.animations[0]);
       action.play();
     }
-  }, [animations, mixer]);
+  }, [gltf.animations, mixer]);
 
   useFrame((state, delta) => {
     if (mixer) mixer.update(delta);
@@ -33,20 +38,25 @@ function Model({ isTalking }) {
 
   return (
     <group ref={group}>
-      <primitive object={scene} scale={1.5} position={[0, -1, 0]} />
+      <primitive object={gltf.scene} scale={1.5} position={[0, -1, 0]} />
     </group>
   );
 }
 
+// Preload the model
+useGLTF.preload('/Mal0_Base_20.glb');
+
 export default function MAL0Model({ isTalking = false }) {
   return (
-    <div style={{ width: '100%', height: '400px', borderRadius: '12px', overflow: 'hidden' }}>
+    <div style={{ width: '100%', height: '400px', borderRadius: '12px', overflow: 'hidden', background: '#0a0a0a' }}>
       <Canvas shadows dpr={[1, 2]}>
         <PerspectiveCamera makeDefault position={[0, 0, 5]} fov={50} />
         <ambientLight intensity={0.5} />
         <spotLight position={[10, 10, 10]} angle={0.15} penumbra={1} intensity={1} castShadow />
         <pointLight position={[-10, -10, -10]} intensity={0.5} />
-        <Model isTalking={isTalking} />
+        <Suspense fallback={null}>
+          <Model isTalking={isTalking} />
+        </Suspense>
         <OrbitControls 
           enableZoom={false} 
           enablePan={false}
