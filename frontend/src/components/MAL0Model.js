@@ -27,7 +27,7 @@ export default function MAL0Model({ isTalking = false }) {
       0.1,
       1000
     );
-    camera.position.z = 3;
+    camera.position.z = 5;
     cameraRef.current = camera;
 
     // Renderer setup
@@ -46,34 +46,99 @@ export default function MAL0Model({ isTalking = false }) {
     spotLight.castShadow = true;
     scene.add(spotLight);
 
-    const pointLight = new THREE.PointLight(0xdc2626, 0.5);
+    const pointLight = new THREE.PointLight(0xdc2626, 0.8);
     pointLight.position.set(-10, -10, -10);
     scene.add(pointLight);
 
-    // Load GLTF Model
-    const loader = new GLTFLoader();
-    loader.load(
-      '/Mal0_Base_20.glb',
-      (gltf) => {
-        const model = gltf.scene;
-        model.scale.set(1.5, 1.5, 1.5);
-        model.position.y = -1;
-        scene.add(model);
-        modelRef.current = model;
-        setLoading(false);
-        setError(false);
-      },
-      (progress) => {
-        // Loading progress
-        const percent = (progress.loaded / progress.total) * 100;
-        console.log(`Loading model: ${percent.toFixed(2)}%`);
-      },
-      (err) => {
-        console.error('Error loading model:', err);
-        setError(true);
-        setLoading(false);
-      }
-    );
+    const pointLight2 = new THREE.PointLight(0x3b82f6, 0.6);
+    pointLight2.position.set(10, -10, 10);
+    scene.add(pointLight2);
+
+    // Create placeholder animated object since .glb file is not available
+    // Create a wolf skull-like representation using geometric shapes
+    const createMAL0Placeholder = () => {
+      const group = new THREE.Group();
+      
+      // Main skull sphere (head)
+      const headGeometry = new THREE.SphereGeometry(1, 32, 32);
+      const headMaterial = new THREE.MeshPhongMaterial({ 
+        color: 0x2a2a2a,
+        emissive: 0x111111,
+        shininess: 30
+      });
+      const head = new THREE.Mesh(headGeometry, headMaterial);
+      group.add(head);
+      
+      // Snout (elongated box)
+      const snoutGeometry = new THREE.BoxGeometry(0.6, 0.5, 1.2);
+      const snoutMaterial = new THREE.MeshPhongMaterial({ 
+        color: 0x3a3a3a,
+        emissive: 0x111111,
+      });
+      const snout = new THREE.Mesh(snoutGeometry, snoutMaterial);
+      snout.position.set(0, -0.2, 0.9);
+      group.add(snout);
+      
+      // Eyes (glowing red spheres)
+      const eyeGeometry = new THREE.SphereGeometry(0.15, 16, 16);
+      const eyeMaterial = new THREE.MeshBasicMaterial({ 
+        color: 0xdc2626,
+        emissive: 0xdc2626,
+        emissiveIntensity: 2
+      });
+      
+      const leftEye = new THREE.Mesh(eyeGeometry, eyeMaterial);
+      leftEye.position.set(-0.35, 0.2, 0.7);
+      group.add(leftEye);
+      
+      const rightEye = new THREE.Mesh(eyeGeometry, eyeMaterial);
+      rightEye.position.set(0.35, 0.2, 0.7);
+      group.add(rightEye);
+      
+      // Ears (pointed cones)
+      const earGeometry = new THREE.ConeGeometry(0.3, 0.8, 8);
+      const earMaterial = new THREE.MeshPhongMaterial({ 
+        color: 0x2a2a2a,
+        emissive: 0x111111,
+      });
+      
+      const leftEar = new THREE.Mesh(earGeometry, earMaterial);
+      leftEar.position.set(-0.7, 0.9, 0.2);
+      leftEar.rotation.z = -0.3;
+      group.add(leftEar);
+      
+      const rightEar = new THREE.Mesh(earGeometry, earMaterial);
+      rightEar.position.set(0.7, 0.9, 0.2);
+      rightEar.rotation.z = 0.3;
+      group.add(rightEar);
+      
+      // Glowing aura around the figure
+      const auraGeometry = new THREE.SphereGeometry(1.8, 32, 32);
+      const auraMaterial = new THREE.MeshBasicMaterial({ 
+        color: 0xdc2626,
+        transparent: true,
+        opacity: 0.1,
+        side: THREE.BackSide
+      });
+      const aura = new THREE.Mesh(auraGeometry, auraMaterial);
+      group.add(aura);
+      
+      return group;
+    };
+
+    // Create the placeholder model
+    try {
+      const placeholder = createMAL0Placeholder();
+      placeholder.position.y = 0;
+      scene.add(placeholder);
+      modelRef.current = placeholder;
+      setLoading(false);
+      setError(false);
+    } catch (err) {
+      console.error('Error creating placeholder:', err);
+      setError(true);
+      setLoading(false);
+    }
 
     // Animation loop
     const clock = new THREE.Clock();
@@ -83,14 +148,15 @@ export default function MAL0Model({ isTalking = false }) {
       const delta = clock.getDelta();
       const elapsed = clock.getElapsedTime();
 
-      // Rotate model
+      // Rotate and animate model
       if (modelRef.current) {
         if (isTalking) {
-          modelRef.current.rotation.y += delta * 0.2;
-          modelRef.current.position.y = -1 + Math.sin(elapsed * 3) * 0.1;
+          modelRef.current.rotation.y += delta * 0.5;
+          modelRef.current.position.y = Math.sin(elapsed * 3) * 0.15;
+          modelRef.current.scale.setScalar(1 + Math.sin(elapsed * 4) * 0.05);
         } else {
-          modelRef.current.rotation.y += delta * 0.1;
-          modelRef.current.position.y = -1 + Math.sin(elapsed) * 0.05;
+          modelRef.current.rotation.y += delta * 0.2;
+          modelRef.current.position.y = Math.sin(elapsed * 0.8) * 0.1;
         }
       }
 
