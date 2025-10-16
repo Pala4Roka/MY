@@ -78,6 +78,71 @@ body {
   font-weight: 300;
 }
 
+.user-info {
+  margin-top: 15px;
+  padding-top: 15px;
+  border-top: 1px solid #333;
+  color: #888;
+  font-size: 14px;
+}
+
+.user-info strong {
+  color: #dc2626;
+}
+
+.header-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.header-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.admin-btn {
+  padding: 10px 20px;
+  background: #dc2626;
+  border: none;
+  border-radius: 8px;
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.admin-btn:hover {
+  background: #991b1b;
+  transform: translateY(-2px);
+}
+
+/* Loading Screen */
+.loading-screen {
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: linear-gradient(135deg, #0a0a0a 0%, #1a0000 100%);
+}
+
+.loading-content {
+  text-align: center;
+}
+
+.es-logo {
+  font-size: 120px;
+  margin-bottom: 20px;
+}
+
+.loading-content h1 {
+  color: #dc2626;
+  font-size: 32px;
+  letter-spacing: 3px;
+  margin-bottom: 20px;
+}
+
 /* Dossier Container */
 .dossier-container {
   margin-top: 3rem;
