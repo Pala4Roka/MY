@@ -89,16 +89,7 @@ body {
   padding: 3rem;
 }
 
-/* Canvas Container */
-canvas {
-  position: fixed !important;
-  top: 0;
-  left: 0;
-  width: 100vw !important;
-  height: 100vh !important;
-  z-index: 1;
-  pointer-events: none;
-}
+/* Canvas Container - removed cursor following image */
 
 /* Scrollbar */
 ::-webkit-scrollbar {
