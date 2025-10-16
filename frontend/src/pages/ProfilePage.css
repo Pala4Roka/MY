@@ -12,6 +12,28 @@
   border-radius: 12px;
   padding: 40px;
   box-shadow: 0 0 30px rgba(220, 38, 38, 0.3);
+  position: relative;
+}
+
+.back-button {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  padding: 10px 20px;
+  background: rgba(59, 130, 246, 0.8);
+  border: 1px solid #3b82f6;
+  border-radius: 8px;
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 14px;
+}
+
+.back-button:hover {
+  background: #3b82f6;
+  transform: translateX(-5px);
+  box-shadow: 0 0 15px rgba(59, 130, 246, 0.5);
 }
 
 .profile-header {
