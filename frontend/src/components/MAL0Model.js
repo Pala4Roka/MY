@@ -5,28 +5,26 @@ import * as THREE from 'three';
 
 function Model({ isTalking }) {
   const group = useRef();
-  const [modelError, setModelError] = useState(false);
   const [mixer, setMixer] = useState(null);
+  const [error, setError] = useState(false);
   
   // Try to load the model with error handling
-  let scene, animations;
+  let gltfResult = null;
   try {
-    const gltf = useGLTF('/Mal0_Base_20.glb');
-    scene = gltf.scene;
-    animations = gltf.animations;
-  } catch (error) {
-    console.error('Error loading MAL0 model:', error);
-    setModelError(true);
+    gltfResult = useGLTF('/Mal0_Base_20.glb', true);
+  } catch (err) {
+    console.error('Error loading MAL0 model:', err);
+    if (!error) setError(true);
   }
 
   useEffect(() => {
-    if (scene && animations && animations.length > 0) {
-      const newMixer = new THREE.AnimationMixer(scene);
-      const action = newMixer.clipAction(animations[0]);
+    if (gltfResult?.scene && gltfResult?.animations && gltfResult.animations.length > 0) {
+      const newMixer = new THREE.AnimationMixer(gltfResult.scene);
+      const action = newMixer.clipAction(gltfResult.animations[0]);
       action.play();
       setMixer(newMixer);
     }
-  }, [scene, animations]);
+  }, [gltfResult]);
 
   useFrame((state, delta) => {
     if (mixer) mixer.update(delta);
@@ -42,8 +40,8 @@ function Model({ isTalking }) {
     }
   });
 
-  // If model failed to load or scene is null, show a fallback
-  if (modelError || !scene) {
+  // If model failed to load, show a fallback
+  if (error || !gltfResult?.scene) {
     return (
       <group ref={group}>
         <mesh>
@@ -56,13 +54,10 @@ function Model({ isTalking }) {
 
   return (
     <group ref={group}>
-      <primitive object={scene} scale={1.5} position={[0, -1, 0]} />
+      <primitive object={gltfResult.scene} scale={1.5} position={[0, -1, 0]} />
     </group>
   );
 }
-
-// Preload the model
-useGLTF.preload('/Mal0_Base_20.glb');
 
 export default function MAL0Model({ isTalking = false }) {
   return (
