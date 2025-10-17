@@ -101,3 +101,105 @@
 #====================================================================================================
 # Testing Data - Main Agent and testing sub agent both should log testing data below this section
 #====================================================================================================
+
+user_problem_statement: |
+  Пользователь хочет улучшить существующий сайт базы данных SCP (Eternal Sentinels):
+  1. Добавить круговое меню ниже поиска досье объектов с логотипом сайта в центре
+  2. Починить AI ассистента MAL0 (проблема с EMERGENT_LLM_KEY)
+  3. Исправить редактирование досье (изменения не сохраняются)
+  4. Добавить 3D анимацию медленного вращения для карусели досье с остановкой при наведении
+  5. Исправить проблему с видео в окне MAL0 (серое пространство, видео не заполняет окно)
+
+backend:
+  - task: "Добавить EMERGENT_LLM_KEY в .env"
+    implemented: true
+    working: true
+    file: "/app/backend/.env"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "main"
+        comment: "EMERGENT_LLM_KEY успешно добавлен в .env, backend запущен и работает"
+
+  - task: "Проверить API endpoint для обновления SCP объектов"
+    implemented: true
+    working: "NA"
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "medium"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Backend API endpoint PUT /api/scp/{number} существует (строка 312), нужно проверить работу"
+
+frontend:
+  - task: "Добавить круговое меню ThreatLevelWheel в DossierList"
+    implemented: false
+    working: false
+    file: "/app/frontend/src/components/DossierList.js, /app/frontend/src/components/ThreatLevelWheel.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: false
+        agent: "main"
+        comment: "Компонент ThreatLevelWheel существует, но не используется. Нужно добавить после search bar и заменить логотип в центре"
+
+  - task: "Исправить редактирование досье в AdminPanel"
+    implemented: false
+    working: false
+    file: "/app/frontend/src/pages/AdminPanel.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: false
+        agent: "main"
+        comment: "Форма редактирования существует, но возможно проблема с маппингом полей (containment_procedures vs special_procedures)"
+
+  - task: "Добавить 3D анимацию вращения для карусели"
+    implemented: false
+    working: false
+    file: "/app/frontend/src/components/DossierCarousel.js"
+    stuck_count: 0
+    priority: "medium"
+    needs_retesting: true
+    status_history:
+      - working: false
+        agent: "main"
+        comment: "Нужно добавить CSS анимацию rotateY и остановку при hover"
+
+  - task: "Исправить проблему с видео в MAL0"
+    implemented: false
+    working: false
+    file: "/app/frontend/src/components/VideoBackground.js, /app/frontend/src/components/VideoBackground.css"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: false
+        agent: "main"
+        comment: "Видео не заполняет контейнер полностью, есть серое пространство. Нужно проверить CSS"
+
+metadata:
+  created_by: "main_agent"
+  version: "1.0"
+  test_sequence: 0
+  run_ui: false
+
+test_plan:
+  current_focus:
+    - "Добавить круговое меню ThreatLevelWheel"
+    - "Исправить редактирование досье"
+    - "Исправить проблему с видео в MAL0"
+    - "Добавить 3D анимацию для карусели"
+  stuck_tasks: []
+  test_all: false
+  test_priority: "high_first"
+
+agent_communication:
+  - agent: "main"
+    message: "Скопировал проект из GitHub репозитория, установил зависимости, добавил EMERGENT_LLM_KEY, backend и frontend успешно запущены. Начинаю реализацию задач."
