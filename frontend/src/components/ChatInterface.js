@@ -116,8 +116,9 @@ export default function ChatInterface({ sessionId }) {
   };
 
   const handleKeyPress = (e) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
+    if (e.key === 'Enter' && !e.shiftKey && !loading) {
       e.preventDefault();
+      e.stopPropagation();
       sendMessage();
     }
   };
