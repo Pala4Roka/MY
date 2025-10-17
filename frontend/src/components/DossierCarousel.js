@@ -61,6 +61,8 @@ export default function DossierCarousel({ objects, onObjectClick }) {
               key={`${obj.id}-${idx}`}
               className={`carousel-card position-${obj.position} ${isTransitioning ? 'transitioning' : ''} ${obj.is_classified ? 'classified' : ''}`}
               onClick={() => obj.position === 0 && onObjectClick(obj)}
+              onMouseEnter={() => setHoveredCard(obj.id)}
+              onMouseLeave={() => setHoveredCard(null)}
               style={{
                 transform: `translateX(${obj.position * 110}%) scale(${obj.position === 0 ? 1 : 0.8})`,
                 opacity: obj.position === 0 ? 1 : 0.5,
