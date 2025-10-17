@@ -14,7 +14,7 @@ export default function Footer() {
     <footer className="es-footer">
       <div className="footer-content">
         <div className="footer-logo">
-          <img src="/assets/new-logo.png" alt="Eternal Sentinels" className="footer-logo-image" />
+          <FooterLogo />
           <h3>ETERNAL SENTINELS</h3>
           <p className="footer-motto">Наблюдай • Содержи • Защищай</p>
         </div>
