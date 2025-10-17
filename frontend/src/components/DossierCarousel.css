@@ -58,20 +58,10 @@
   justify-content: center;
   perspective: 1200px;
   transform-style: preserve-3d;
-  animation: rotate3D 20s linear infinite;
 }
 
-.carousel-track:hover {
+.carousel-track:hover .carousel-card {
   animation-play-state: paused;
-}
-
-@keyframes rotate3D {
-  0% {
-    transform: rotateY(0deg);
-  }
-  100% {
-    transform: rotateY(360deg);
-  }
 }
 
 .carousel-card {
