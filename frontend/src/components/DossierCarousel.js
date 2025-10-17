@@ -46,8 +46,7 @@ export default function DossierCarousel({ objects, onObjectClick }) {
   return (
     <div className="dossier-carousel">
       <div className="carousel-header">
-        <h2 className="carousel-title">🔥 РАНДОМНЫЕ ДОСЬЕ</h2>
-        <p className="carousel-subtitle">Автоматическая ротация каждые 5 секунд</p>
+        <h2 className="carousel-title">🔥 ИЗБРАННЫЕ ДОСЬЕ</h2>
       </div>
 
       <div className="carousel-container">
