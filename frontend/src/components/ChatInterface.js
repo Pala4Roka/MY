@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { chatAPI } from '../api';
 import './ChatInterface.css';
+import './ChatInterfaceResponsive.css';
 import MAL0ModelNew from './MAL0ModelNew';
 
 export default function ChatInterface({ sessionId }) {
