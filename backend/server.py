@@ -527,11 +527,12 @@ async def chat_with_mal0(request: ChatRequest, current_user: Optional[dict] = De
             "user_id": current_user["id"] if current_user else None,
             "role": "assistant",
             "content": fallback_response,
+            "emotion": "calm",
             "timestamp": datetime.now(timezone.utc).isoformat()
         }
         await db.chat_messages.insert_one(assistant_message_doc)
         
-        return ChatResponse(response=fallback_response)
+        return ChatResponse(response=fallback_response, emotion="calm")
 
 
 @api_router.get("/chat/history/{session_id}")
