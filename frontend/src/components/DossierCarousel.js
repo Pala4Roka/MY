@@ -4,6 +4,7 @@ import './DossierCarousel.css';
 export default function DossierCarousel({ objects, onObjectClick }) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isTransitioning, setIsTransitioning] = useState(false);
+  const [hoveredCard, setHoveredCard] = useState(null);
 
   // Автоматическая прокрутка каждые 5 секунд
   useEffect(() => {
