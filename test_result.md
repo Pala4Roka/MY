@@ -141,6 +141,18 @@ backend:
       - working: true
         agent: "main"
         comment: "Backend API endpoint PUT /api/scp/{number} работает, модальное окно редактирования открывается"
+
+  - task: "Проверить MAL0 AI ассистента"
+    implemented: true
+    working: true
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "testing"
+        comment: "MAL0 AI ассистент полностью функционален: POST /api/chat возвращает корректные ответы с полями response и emotion для всех уровней допуска (1-4). Протестировано с различными сообщениями. EMERGENT_LLM_KEY настроен корректно. Все 12 тестов чата пройдены успешно."
   
   - task: "Проверить систему доступа по уровням допуска (clearance levels)"
     implemented: true
