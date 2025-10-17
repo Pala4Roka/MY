@@ -101,3 +101,144 @@
 #====================================================================================================
 # Testing Data - Main Agent and testing sub agent both should log testing data below this section
 #====================================================================================================
+
+user_problem_statement: |
+  Русский пользователь просит улучшить SCP веб-приложение с MAL0 AI ассистентом:
+  1. Добавить костные 3D анимации для модели MAL0 (5 эмоций: спокойствие, радость, игривость, печаль, усталость)
+  2. Анимации должны переключаться автоматически на основе AI анализа эмоций в чате
+  3. Исправить автоскролл в чате
+  4. Добавить email регистрацию с подтверждением
+  5. Сделать адаптивный дизайн для всех устройств
+  6. Добавить функции редактирования и удаления досье
+  7. Исправить скачку досье (убрать артефакты)
+  8. Добавить анимацию моргания глаза к логотипу
+  9. Создать полную инструкцию по установке
+
+backend:
+  - task: "Email регистрация и подтверждение"
+    implemented: false
+    working: "NA"
+    file: "backend/server.py, backend/models.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Нужно добавить поле email, систему подтверждения, SMTP"
+
+  - task: "API для анализа эмоций в ответах чата"
+    implemented: false
+    working: "NA"
+    file: "backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Нужно добавить AI анализ эмоций и возвращать emotion в /api/chat"
+
+frontend:
+  - task: "3D модель MAL0 с костными анимациями (5 эмоций)"
+    implemented: false
+    working: "NA"
+    file: "frontend/src/components/MAL0Model.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Модель имеет 868 костей но нет готовых анимаций. Создам процедурные анимации костей программно."
+
+  - task: "Исправить автоскролл в чате"
+    implemented: false
+    working: "NA"
+    file: "frontend/src/components/ChatInterface.js"
+    stuck_count: 0
+    priority: "medium"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Текущий scrollToBottom вызывается всегда, нужно проверять позицию пользователя"
+
+  - task: "Email регистрация UI"
+    implemented: false
+    working: "NA"
+    file: "frontend/src/pages/LoginPage.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Добавить поле email и страницу подтверждения"
+
+  - task: "Редактирование и удаление досье"
+    implemented: false
+    working: "NA"
+    file: "frontend/src/components/DossierModal.js, frontend/src/pages/DossierDetailPage.js"
+    stuck_count: 0
+    priority: "medium"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Нужно добавить кнопки и формы редактирования"
+
+  - task: "Улучшить скачку досье без артефактов"
+    implemented: false
+    working: "NA"
+    file: "frontend/src/components/DossierModal.js"
+    stuck_count: 0
+    priority: "medium"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Оптимизировать html2canvas и jsPDF"
+
+  - task: "Адаптивный дизайн для всех устройств"
+    implemented: false
+    working: "NA"
+    file: "frontend/src/**/*.css"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Добавить media queries, оптимизировать 3D для мобильных"
+
+  - task: "Анимация моргания глаза логотипа"
+    implemented: false
+    working: "NA"
+    file: "frontend/src/components/ESLogo.js"
+    stuck_count: 0
+    priority: "low"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Добавить моргание и движение зрачка"
+
+metadata:
+  created_by: "main_agent"
+  version: "1.0"
+  test_sequence: 0
+  run_ui: false
+
+test_plan:
+  current_focus:
+    - "Email регистрация и подтверждение"
+    - "API для анализа эмоций в ответах чата"
+    - "3D модель MAL0 с костными анимациями (5 эмоций)"
+  stuck_tasks: []
+  test_all: false
+  test_priority: "high_first"
+
+agent_communication:
+  - agent: "main"
+    message: "Начинаю работу. Модель имеет 868 костей но нет готовых анимаций. Буду создавать процедурные анимации программно."
