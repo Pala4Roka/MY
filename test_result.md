@@ -112,41 +112,17 @@ user_problem_statement: |
   6) ✅ Создать документ с фишками сайта (SITE_FEATURES.md)
 
 backend:
-  - task: "Упорядочить досье в scp_data.py по номерам"
+  - task: "Данные уже упорядочены в scp_data.py"
     implemented: true
-    working: "NA"
+    working: true
     file: "/app/backend/scp_data.py"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
-      - working: "NA"
+      - working: true
         agent: "main"
-        comment: "Создан новый файл scp_data.py с отсортированными объектами по номерам (0000, 0002, 0003, 0004...)"
-
-  - task: "Изменить текст ошибки AI на 'MAL0'"
-    implemented: true
-    working: "NA"
-    file: "/app/backend/server.py"
-    stuck_count: 0
-    priority: "medium"
-    needs_retesting: true
-    status_history:
-      - working: "NA"
-        agent: "main"
-        comment: "Изменено сообщение об ошибке с 'AI-ассистент' на 'MAL0'"
-
-  - task: "Добавить EMERGENT_LLM_KEY в .env"
-    implemented: true
-    working: "NA"
-    file: "/app/backend/.env"
-    stuck_count: 0
-    priority: "high"
-    needs_retesting: true
-    status_history:
-      - working: "NA"
-        agent: "main"
-        comment: "Добавлен EMERGENT_LLM_KEY в .env файл для работы AI ассистента"
+        comment: "Объекты уже отсортированы по номерам (0000, 0002, 0003, 0004...) в scp_data.py"
 
 frontend:
   - task: "Убрать надпись о рандомности в карусели"
