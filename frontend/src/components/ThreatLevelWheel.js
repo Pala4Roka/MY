@@ -52,6 +52,8 @@ export default function ThreatLevelWheel({ onSelectLevel, currentLevel = 'all' }
                   key={level.key}
                   className={`wheel-item ${currentLevel === level.key ? 'selected' : ''}`}
                   style={{
+                    '--x': `${x}px`,
+                    '--y': `${y}px`,
                     transform: `translate(${x}px, ${y}px)`,
                     borderColor: level.color,
                     backgroundColor: currentLevel === level.key ? `${level.color}30` : 'rgba(20, 20, 30, 0.95)',
