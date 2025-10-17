@@ -6,6 +6,7 @@ import DossierList from '../components/DossierList';
 import ESLogo from '../components/ESLogo';
 import OrganizationInfo from '../components/OrganizationInfo';
 import Footer from '../components/Footer';
+import ScrollToTop from '../components/ScrollToTop';
 import { scpAPI, getUser } from '../api';
 
 export default function HomePage({ onAdminClick }) {
