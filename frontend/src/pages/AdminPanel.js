@@ -406,8 +406,8 @@ Eternal Sentinels © 2025
               <div className="form-group">
                 <label>Процедуры содержания:</label>
                 <textarea
-                  value={editForm.containment_procedures}
-                  onChange={(e) => setEditForm({...editForm, containment_procedures: e.target.value})}
+                  value={editForm.special_procedures}
+                  onChange={(e) => setEditForm({...editForm, special_procedures: e.target.value})}
                   rows="4"
                 />
               </div>
