@@ -83,9 +83,10 @@
 
 /* Circular wheel */
 .threat-wheel {
-  position: fixed;
-  bottom: 110px;
-  right: 110px;
+  position: absolute;
+  top: 80px;
+  left: 50%;
+  transform: translateX(-50%);
   width: 400px;
   height: 400px;
   z-index: 999;
