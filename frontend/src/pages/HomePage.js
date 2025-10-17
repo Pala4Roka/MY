@@ -69,6 +69,9 @@ export default function HomePage({ onAdminClick }) {
         sessionId={sessionId}
       />
 
+      {/* Organization Info */}
+      <OrganizationInfo />
+
       {/* Dossier List */}
       <div className="dossier-container">
         <DossierList 
