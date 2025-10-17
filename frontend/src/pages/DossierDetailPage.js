@@ -82,9 +82,32 @@ export default function DossierDetailPage() {
         <button onClick={() => navigate('/')} className="back-btn">
           ← Назад к списку
         </button>
-        <button onClick={exportToPDF} className="export-btn" disabled={exporting}>
-          {exporting ? 'Экспорт...' : '📄 Скачать досье'}
-        </button>
+        <div className="export-buttons">
+          <button 
+            onClick={() => handleExport('txt')} 
+            className="export-btn export-txt"
+            disabled={exporting}
+            title="Скачать в формате TXT"
+          >
+            {exporting && exportFormat === 'txt' ? '⏳' : '📄'} TXT
+          </button>
+          <button 
+            onClick={() => handleExport('pdf')} 
+            className="export-btn export-pdf"
+            disabled={exporting}
+            title="Скачать в формате PDF"
+          >
+            {exporting && exportFormat === 'pdf' ? '⏳' : '📕'} PDF
+          </button>
+          <button 
+            onClick={() => handleExport('doc')} 
+            className="export-btn export-doc"
+            disabled={exporting}
+            title="Скачать в формате DOC"
+          >
+            {exporting && exportFormat === 'doc' ? '⏳' : '📘'} DOC
+          </button>
+        </div>
       </div>
 
       <div className="detail-container">
