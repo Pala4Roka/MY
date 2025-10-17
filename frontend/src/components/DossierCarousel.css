@@ -110,7 +110,7 @@
 }
 
 .carousel-number {
-  font-size: 24px;
+  font-size: 20px;
   font-weight: bold;
   color: #dc2626;
   font-family: 'Courier New', monospace;
@@ -120,27 +120,27 @@
 .carousel-classified-badge {
   background: rgba(220, 38, 38, 0.2);
   color: #dc2626;
-  padding: 6px 12px;
+  padding: 4px 10px;
   border-radius: 6px;
-  font-size: 11px;
+  font-size: 10px;
   font-weight: bold;
   letter-spacing: 1px;
   border: 1px solid rgba(220, 38, 38, 0.4);
 }
 
 .carousel-name {
-  font-size: 28px;
+  font-size: 24px;
   font-weight: bold;
   color: #f0f0f0;
-  margin-bottom: 12px;
+  margin-bottom: 10px;
   text-shadow: 0 2px 10px rgba(0, 0, 0, 0.8);
 }
 
 .carousel-codename {
-  font-size: 18px;
+  font-size: 16px;
   color: #b0b0b0;
   font-style: italic;
-  margin-bottom: 20px;
+  margin-bottom: 16px;
 }
 
 .carousel-threat {
