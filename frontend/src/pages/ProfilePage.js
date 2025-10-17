@@ -8,9 +8,16 @@ export default function ProfilePage({ user }) {
   const [userData, setUserData] = useState(user);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
+  const [profileImage, setProfileImage] = useState(null);
+  const [uploadingImage, setUploadingImage] = useState(false);
 
   useEffect(() => {
     fetchUserData();
+    // Load profile image from localStorage
+    const savedImage = localStorage.getItem(`profile_image_${user?.id}`);
+    if (savedImage) {
+      setProfileImage(savedImage);
+    }
   }, []);
 
   const fetchUserData = async () => {
@@ -23,6 +30,51 @@ export default function ProfilePage({ user }) {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleImageUpload = (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    // Check file type
+    const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+    if (!validTypes.includes(file.type)) {
+      setMessage('Пожалуйста, загрузите изображение (JPG, PNG, GIF или WebP)');
+      return;
+    }
+
+    // Check file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      setMessage('Размер файла не должен превышать 5MB');
+      return;
+    }
+
+    setUploadingImage(true);
+    const reader = new FileReader();
+    
+    reader.onloadend = () => {
+      const imageData = reader.result;
+      setProfileImage(imageData);
+      // Save to localStorage
+      localStorage.setItem(`profile_image_${userData?.id}`, imageData);
+      setMessage('Изображение профиля успешно обновлено!');
+      setUploadingImage(false);
+      setTimeout(() => setMessage(''), 3000);
+    };
+
+    reader.onerror = () => {
+      setMessage('Ошибка при загрузке изображения');
+      setUploadingImage(false);
+    };
+
+    reader.readAsDataURL(file);
+  };
+
+  const removeProfileImage = () => {
+    setProfileImage(null);
+    localStorage.removeItem(`profile_image_${userData?.id}`);
+    setMessage('Изображение профиля удалено');
+    setTimeout(() => setMessage(''), 3000);
   };
 
   const getClearanceLevelName = (level) => {
