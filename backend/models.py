@@ -104,4 +104,6 @@ THREAT_CLASS_ACCESS = {
 
 def get_required_clearance(threat_class: str) -> int:
     """Get the minimum clearance level required to access objects of this threat class"""
-    return THREAT_CLASS_ACCESS.get(threat_class, 5)
+    # Extract base threat class name (before parentheses)
+    base_threat_class = threat_class.split(" ")[0] if threat_class else ""
+    return THREAT_CLASS_ACCESS.get(base_threat_class, 5)
