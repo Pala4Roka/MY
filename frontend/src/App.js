@@ -6,6 +6,7 @@ import DossierDetailPage from './pages/DossierDetailPage';
 import LoginPage from './pages/LoginPage';
 import AdminPanel from './pages/AdminPanel';
 import ProfilePage from './pages/ProfilePage';
+import AnimatedBackground from './components/AnimatedBackground';
 import { getUser, removeToken, removeUser, authAPI } from './api';
 
 function App() {
