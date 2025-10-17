@@ -336,6 +336,42 @@ async def delete_scp_object(
 
 # ============ CHAT ROUTES ============
 
+def detect_emotion_from_text(text: str) -> str:
+    """Analyze emotion from text using simple keyword detection"""
+    text_lower = text.lower()
+    
+    # Joy keywords
+    joy_keywords = ['счастлив', 'рад', 'отлично', 'замечательно', 'великолепно', 'супер', 'ура', 'ахаха', 'хаха', 'спасибо', 'благодарю', 'люблю', 'обожаю']
+    # Sad keywords
+    sad_keywords = ['грустн', 'печальн', 'плохо', 'ужасно', 'грустно', 'жаль', 'сожале', 'извини', 'простите']
+    # Playful keywords
+    playful_keywords = ['играть', 'игр', 'весел', 'шут', 'смешн', 'забавн', 'интересн', 'любопытн']
+    # Tired keywords
+    tired_keywords = ['устал', 'утомл', 'сон', 'спать', 'устал', 'измучен', 'вымотал']
+    
+    # Count matches
+    joy_count = sum(1 for keyword in joy_keywords if keyword in text_lower)
+    sad_count = sum(1 for keyword in sad_keywords if keyword in text_lower)
+    playful_count = sum(1 for keyword in playful_keywords if keyword in text_lower)
+    tired_count = sum(1 for keyword in tired_keywords if keyword in text_lower)
+    
+    # Return dominant emotion
+    max_count = max(joy_count, sad_count, playful_count, tired_count)
+    if max_count == 0:
+        return 'calm'
+    
+    if joy_count == max_count:
+        return 'joy'
+    elif sad_count == max_count:
+        return 'sad'
+    elif playful_count == max_count:
+        return 'playful'
+    elif tired_count == max_count:
+        return 'tired'
+    else:
+        return 'calm'
+
+
 @api_router.post("/chat", response_model=ChatResponse)
 async def chat_with_mal0(request: ChatRequest, current_user: Optional[dict] = Depends(get_current_user)):
     """Chat with MAL0 assistant - Enhanced with personality and clearance awareness"""
