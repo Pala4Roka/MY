@@ -178,7 +178,7 @@ export default function ChatInterface({ sessionId }) {
           className="chat-input"
           value={input}
           onChange={(e) => setInput(e.target.value)}
-          onKeyPress={handleKeyPress}
+          onKeyDown={handleKeyPress}
           placeholder="Введите сообщение..."
           rows={2}
           disabled={loading}
