@@ -142,15 +142,29 @@ async def register(user_data: UserCreate):
     if existing_user:
         raise HTTPException(status_code=400, detail="Username already exists")
     
+    # Prevent registration with admin-level clearance or admin username
+    if user_data.clearance_level >= 5:
+        raise HTTPException(
+            status_code=403, 
+            detail="Cannot register with clearance level 5. Contact administrator."
+        )
+    
+    if user_data.username.lower() == "admin":
+        raise HTTPException(status_code=403, detail="This username is reserved")
+    
+    # Limit clearance level for new users to max 4
+    clearance_level = min(user_data.clearance_level, 4)
+    
     # Create user
     user = User(
         username=user_data.username,
         password_hash=hash_password(user_data.password),
-        clearance_level=user_data.clearance_level
+        clearance_level=clearance_level
     )
     
     user_dict = user.model_dump()
     user_dict["created_at"] = user_dict["created_at"].isoformat()
+    user_dict["is_admin"] = False  # Regular users are not admins
     await db.users.insert_one(user_dict)
     
     # Create token
