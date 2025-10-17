@@ -495,6 +495,9 @@ async def chat_with_mal0(request: ChatRequest, current_user: Optional[dict] = De
         user_msg = UserMessage(text=request.message)
         response = await chat.send_message(user_msg)
         
+        # Detect emotion from response
+        emotion = detect_emotion_from_text(response)
+        
         # Store assistant response
         assistant_message_doc = {
             "id": str(datetime.now(timezone.utc).timestamp()),
@@ -502,11 +505,12 @@ async def chat_with_mal0(request: ChatRequest, current_user: Optional[dict] = De
             "user_id": current_user["id"] if current_user else None,
             "role": "assistant",
             "content": response,
+            "emotion": emotion,
             "timestamp": datetime.now(timezone.utc).isoformat()
         }
         await db.chat_messages.insert_one(assistant_message_doc)
         
-        return ChatResponse(response=response)
+        return ChatResponse(response=response, emotion=emotion)
         
     except Exception as e:
         logger.error(f"Error in chat: {str(e)}")
