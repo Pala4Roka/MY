@@ -132,9 +132,9 @@ export default function ChatInterface({ sessionId }) {
         <div className="chat-status">{isSpeaking ? 'Говорит...' : 'Online'}</div>
       </div>
       
-      {/* 3D Model of MAL0 with emotion */}
+      {/* Video Background of MAL0 with emotion */}
       <div className="mal0-model-container">
-        <MAL0ModelNew isTalking={isSpeaking} emotion={currentEmotion} />
+        <VideoBackground isTalking={isSpeaking} emotion={currentEmotion} />
       </div>
       
       <div 
