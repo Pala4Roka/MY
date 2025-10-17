@@ -155,26 +155,26 @@
 }
 
 .carousel-threat-label {
-  font-size: 11px;
+  font-size: 10px;
   color: #888;
   text-transform: uppercase;
   letter-spacing: 1px;
 }
 
 .carousel-threat-value {
-  font-size: 14px;
+  font-size: 13px;
   color: #dc2626;
   font-weight: bold;
 }
 
 .carousel-view-btn {
   width: 100%;
-  padding: 12px;
+  padding: 10px;
   background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%);
   color: white;
   border: none;
   border-radius: 8px;
-  font-size: 14px;
+  font-size: 13px;
   font-weight: bold;
   cursor: pointer;
   transition: all 0.3s ease;
