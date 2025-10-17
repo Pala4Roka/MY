@@ -1,6 +1,7 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo } from 'react';
 import './DossierList.css';
 import DossierCarousel from './DossierCarousel';
+import ThreatLevelWheel from './ThreatLevelWheel';
 
 const THREAT_LEVELS = [
   { key: 'all', label: 'Все объекты', color: '#6b7280' },
