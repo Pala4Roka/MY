@@ -9,6 +9,37 @@
   overflow: hidden;
 }
 
+/* Toggle button for background */
+.background-toggle-btn {
+  position: fixed;
+  bottom: 100px;
+  right: 30px;
+  width: 60px;
+  height: 60px;
+  background: linear-gradient(135deg, rgba(220, 38, 38, 0.9), rgba(153, 27, 27, 0.9));
+  border: 2px solid rgba(220, 38, 38, 0.5);
+  border-radius: 50%;
+  font-size: 28px;
+  cursor: pointer;
+  z-index: 1000;
+  transition: all 0.3s ease;
+  box-shadow: 0 0 20px rgba(220, 38, 38, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: all;
+}
+
+.background-toggle-btn:hover {
+  transform: scale(1.1) rotate(15deg);
+  box-shadow: 0 0 30px rgba(220, 38, 38, 0.8);
+  background: linear-gradient(135deg, rgba(220, 38, 38, 1), rgba(153, 27, 27, 1));
+}
+
+.background-toggle-btn:active {
+  transform: scale(0.95);
+}
+
 /* Floating particles */
 .particles {
   position: absolute;
