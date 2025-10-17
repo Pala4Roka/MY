@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import './ThreatLevelWheel.css';
+import ESLogo from './ESLogo';
 
 const THREAT_LEVELS = [
   { key: 'all', label: 'Все', color: '#6b7280', icon: '⚡' },
