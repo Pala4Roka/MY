@@ -412,15 +412,6 @@ Eternal Sentinels © 2025
               </div>
 
               <div className="form-group">
-                <label>Информация об обнаружении:</label>
-                <textarea
-                  value={editForm.discovery_info}
-                  onChange={(e) => setEditForm({...editForm, discovery_info: e.target.value})}
-                  rows="4"
-                />
-              </div>
-
-              <div className="form-group">
                 <label>Секретная информация (Уровень 5):</label>
                 <textarea
                   value={editForm.secret_data}
