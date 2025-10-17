@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { chatAPI } from '../api';
 import './ChatInterface.css';
 import './ChatInterfaceResponsive.css';
-import MAL0ModelNew from './MAL0ModelNew';
+import VideoBackground from './VideoBackground';
 
 export default function ChatInterface({ sessionId }) {
   const [messages, setMessages] = useState([]);
