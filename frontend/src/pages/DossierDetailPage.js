@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { scpAPI } from '../api';
 import ScrollToTop from '../components/ScrollToTop';
+import { exportToTXT, exportToPDF, exportToDOC } from '../utils/dossierExport';
 import './DossierDetailPage.css';
 
 export default function DossierDetailPage() {
