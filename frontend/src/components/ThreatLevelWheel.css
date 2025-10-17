@@ -125,6 +125,16 @@
   animation: centerGlow 2s ease-in-out infinite;
   z-index: 10;
   overflow: hidden;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.wheel-center:hover {
+  transform: translate(-50%, -50%) scale(1.1);
+  box-shadow: 
+    0 0 30px rgba(220, 38, 38, 0.6),
+    inset 0 0 30px rgba(220, 38, 38, 0.3);
+  background: radial-gradient(circle, rgba(220, 38, 38, 0.5), rgba(20, 20, 30, 0.95));
 }
 
 .wheel-center .es-logo-container {
