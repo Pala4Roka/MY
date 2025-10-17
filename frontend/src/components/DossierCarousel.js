@@ -33,22 +33,24 @@ export default function DossierCarousel({ objects, onObjectClick }) {
     const visible = [];
     const totalObjects = objects.length;
     const angleStep = 360 / totalObjects;
-    const radius = 450;
+    const radius = 350; // Radius of the 3D circle
     
     for (let i = 0; i < totalObjects; i++) {
       const index = (currentIndex + i) % totalObjects;
       const angle = (i * angleStep * Math.PI) / 180;
       const x = Math.sin(angle) * radius;
       const z = Math.cos(angle) * radius;
-      const isFront = i === 0;
+      const isFront = Math.abs(z) === Math.max(...Array.from({length: totalObjects}, (_, j) => Math.abs(Math.cos((j * angleStep * Math.PI) / 180) * radius)));
       
       visible.push({
         ...objects[index],
         position: i,
         x: x,
         z: z,
-        rotateY: -i * angleStep,
-        isFront: isFront
+        rotateY: (i * angleStep),
+        isFront: z > radius * 0.5, // Cards in front half
+        scale: 0.7 + (z / radius) * 0.3, // Scale based on depth (0.7 to 1.0)
+        opacity: 0.4 + (z / radius) * 0.6 // Opacity based on depth (0.4 to 1.0)
       });
     }
     return visible;
