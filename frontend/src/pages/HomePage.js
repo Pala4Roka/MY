@@ -4,6 +4,7 @@ import { v4 as uuidv4 } from 'uuid';
 import ChatInterface from '../components/ChatInterface';
 import DossierList from '../components/DossierList';
 import ESLogo from '../components/ESLogo';
+import OrganizationInfo from '../components/OrganizationInfo';
 import { scpAPI, getUser } from '../api';
 
 export default function HomePage({ onAdminClick }) {
