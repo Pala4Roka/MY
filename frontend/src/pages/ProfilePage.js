@@ -169,20 +169,26 @@ export default function ProfilePage({ user }) {
             <div className="info-value">{userData?.username || 'N/A'}</div>
           </div>
 
-          <div className="info-card">
+          <div className="info-card clearance-card">
             <div className="info-label">Уровень допуска</div>
-            <div 
-              className="info-value clearance-badge"
-              style={{ 
-                backgroundColor: getClearanceColor(userData?.clearance_level),
-                color: '#000',
-                fontWeight: 'bold',
-                padding: '8px 16px',
-                borderRadius: '6px',
-                display: 'inline-block'
-              }}
-            >
-              Уровень {userData?.clearance_level || 1} - {getClearanceLevelName(userData?.clearance_level)}
+            <div className="clearance-display">
+              <div 
+                className="clearance-level-badge"
+                style={{ 
+                  backgroundColor: getClearanceColor(userData?.clearance_level),
+                  boxShadow: `0 0 20px ${getClearanceColor(userData?.clearance_level)}80`
+                }}
+              >
+                <div className="clearance-number">{userData?.clearance_level || 1}</div>
+                <div className="clearance-name">{getClearanceLevelName(userData?.clearance_level)}</div>
+              </div>
+              <div className="clearance-description">
+                {userData?.clearance_level === 1 && 'Доступ к объектам класса Угроза'}
+                {userData?.clearance_level === 2 && 'Доступ к объектам класса Угроза (расширенный)'}
+                {userData?.clearance_level === 3 && 'Доступ к Опасным и Катаклизмическим объектам'}
+                {userData?.clearance_level === 4 && 'Доступ к Критическим объектам и Пределу'}
+                {userData?.clearance_level === 5 && 'Полный доступ ко всем объектам и секретным данным'}
+              </div>
             </div>
           </div>
 
