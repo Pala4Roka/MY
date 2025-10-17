@@ -78,14 +78,11 @@ export default function DossierCarousel({ objects, onObjectClick }) {
             <div
               key={`${obj.id}-${idx}`}
               className={`carousel-card ${isTransitioning ? 'transitioning' : ''} ${obj.is_classified ? 'classified' : ''}`}
-              onClick={() => obj.isFront && onObjectClick(obj)}
+              onClick={() => onObjectClick(obj)}
               onMouseEnter={() => setHoveredCard(obj.id)}
               onMouseLeave={() => setHoveredCard(null)}
               style={{
-                transform: `rotateY(${obj.rotateY}deg) translateZ(${obj.z}px)`,
-                opacity: obj.opacity,
-                zIndex: Math.round(obj.z),
-                pointerEvents: obj.isFront ? 'auto' : 'none'
+                animationDelay: `${-idx * (30 / objects.length)}s`
               }}
             >
               <div className="carousel-card-header">
@@ -100,9 +97,7 @@ export default function DossierCarousel({ objects, onObjectClick }) {
                 <span className="carousel-threat-label">Класс угрозы:</span>
                 <span className="carousel-threat-value">{obj.threat_class}</span>
               </div>
-              {obj.isFront && (
-                <button className="carousel-view-btn">Подробнее →</button>
-              )}
+              <button className="carousel-view-btn">Подробнее →</button>
             </div>
           ))}
         </div>
