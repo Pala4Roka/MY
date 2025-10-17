@@ -146,35 +146,35 @@
 .carousel-threat {
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  padding: 15px;
+  gap: 6px;
+  padding: 12px;
   background: rgba(0, 0, 0, 0.4);
   border-radius: 8px;
   border-left: 4px solid #dc2626;
-  margin-bottom: 20px;
+  margin-bottom: 16px;
 }
 
 .carousel-threat-label {
-  font-size: 12px;
+  font-size: 11px;
   color: #888;
   text-transform: uppercase;
   letter-spacing: 1px;
 }
 
 .carousel-threat-value {
-  font-size: 16px;
+  font-size: 14px;
   color: #dc2626;
   font-weight: bold;
 }
 
 .carousel-view-btn {
   width: 100%;
-  padding: 14px;
+  padding: 12px;
   background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%);
   color: white;
   border: none;
   border-radius: 8px;
-  font-size: 16px;
+  font-size: 14px;
   font-weight: bold;
   cursor: pointer;
   transition: all 0.3s ease;
