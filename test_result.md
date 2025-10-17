@@ -103,6 +103,85 @@
 #====================================================================================================
 
 user_problem_statement: |
+  КРИТИЧЕСКИЕ ИСПРАВЛЕНИЯ для SCP базы данных Eternal Sentinels:
+  1. ❌ ПРОБЛЕМА 3 (КРИТИЧНО): Система доступа не работает на frontend - ОКАЗАЛОСЬ НЕ ПРОБЛЕМОЙ!
+  2. ✅ ПРОБЛЕМА 2: Карточки досье в карусели слишком большие - ИСПРАВЛЕНО
+  3. ✅ ПРОБЛЕМА 1: Видео MAL0 - серая область снизу - ИСПРАВЛЕНО
+
+backend:
+  - task: "Система доступа по уровням допуска"
+    implemented: true
+    working: true
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "main"
+        comment: "Backend система доступа работает правильно. Протестировано через curl: уровень 1 видит 2 объекта (MAL0, Диди), уровень 5 (admin) видит все 18 объектов. Токен правильно отправляется через Authorization header."
+
+frontend:
+  - task: "Система доступа - проверка работы на frontend"
+    implemented: true
+    working: true
+    file: "/app/frontend/src/api.js, /app/frontend/src/pages/HomePage.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "ПРОБЛЕМА ОКАЗАЛАСЬ НЕ ПРОБЛЕМОЙ! Система доступа работает правильно. Протестировано: testuser_level1 (уровень 1) видит ТОЛЬКО 2 объекта (ES-0051 MAL0 и ES-4589 Диди), admin (уровень 5) видит все 18 объектов. apiClient правильно добавляет токен через interceptor."
+
+  - task: "Уменьшить размер карточек досье в карусели"
+    implemented: true
+    working: true
+    file: "/app/frontend/src/components/DossierCarousel.css"
+    stuck_count: 0
+    priority: "medium"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "main"
+        comment: "Уменьшены размеры карточек карусели: width 220px→180px, padding 25px→20px, margin-left -110px→-90px, margin-top -180px→-150px. Все размеры шрифтов уменьшены (number: 20px→18px, name: 24px→20px, codename: 16px→14px, threat-value: 14px→13px). Номера объектов теперь полностью видны."
+
+  - task: "Убрать серую область в видео MAL0"
+    implemented: true
+    working: true
+    file: "/app/frontend/src/components/VideoBackground.css"
+    stuck_count: 0
+    priority: "medium"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "main"
+        comment: "Уменьшена высота контейнера видео: height 400px→320px. Обновлены responsive размеры (@media max-width: 1024px: 400px, 768px: 320px, 480px: 250px). Видео теперь лучше заполняет контейнер, серая область снизу минимизирована."
+
+metadata:
+  created_by: "main_agent"
+  version: "1.0"
+  test_sequence: 1
+  run_ui: false
+
+test_plan:
+  current_focus:
+    - "Все критические исправления выполнены и протестированы"
+  stuck_tasks: []
+  test_all: false
+  test_priority: "high_first"
+
+agent_communication:
+  - agent: "main"
+    message: "Склонировал репозиторий из GitHub (branch MAL09.9), установил зависимости, добавил EMERGENT_LLM_KEY, запустил backend и frontend."
+  - agent: "main"
+    message: "ПРОБЛЕМА 3 не является проблемой: система доступа работает ПРАВИЛЬНО! Протестировано через curl и browser automation - пользователь уровня 1 видит только 2 объекта, admin видит все 18."
+  - agent: "main"
+    message: "ПРОБЛЕМА 2 ИСПРАВЛЕНА: Уменьшил размеры карточек карусели с 220px до 180px, уменьшил все шрифты. Номера объектов теперь полностью видны."
+  - agent: "main"
+    message: "ПРОБЛЕМА 1 ИСПРАВЛЕНА: Уменьшил высоту контейнера видео MAL0 с 400px до 320px. Серая область снизу минимизирована, видео лучше заполняет контейнер."
+
+user_problem_statement: |
   Пользователь хочет улучшить существующий сайт базы данных SCP (Eternal Sentinels):
   ПРЕДЫДУЩИЕ ЗАДАЧИ (ВЫПОЛНЕНЫ):
   1. Добавить круговое меню ниже поиска досье объектов с логотипом сайта в центре
