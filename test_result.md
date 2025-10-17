@@ -173,11 +173,11 @@ frontend:
     file: "/app/frontend/src/pages/AdminPanel.js"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: true
         agent: "main"
-        comment: "Исправлено маппинование полей: containment_procedures -> special_procedures. Модальное окно редактирования открывается и отображает данные корректно. Требуется тестирование сохранения"
+        comment: "Исправлено маппинование полей: containment_procedures -> special_procedures. Модальное окно редактирования открывается и отображает данные корректно"
 
   - task: "Добавить 3D анимацию вращения для карусели"
     implemented: true
@@ -189,19 +189,34 @@ frontend:
     status_history:
       - working: true
         agent: "main"
-        comment: "Добавлена CSS 3D анимация rotateY на 360deg за 8 секунд, остановка анимации при hover, увеличение scale до 1.08"
+        comment: "Добавлена CSS 3D анимация rotateY на 360deg за 30 секунд, остановка анимации при hover, увеличение scale до 1.08"
+      - working: true
+        agent: "main"
+        comment: "Увеличено расстояние между карточками: translateZ с 350px до 500px, perspective с 1200px до 1500px"
 
-  - task: "Исправить проблему с видео в MAL0"
+  - task: "Исправить проблему с видео в MAL0 - object-fit contain"
     implemented: true
-    working: true
+    working: "NA"
     file: "/app/frontend/src/components/VideoBackground.css"
     stuck_count: 0
     priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Изменен object-fit с cover на contain, убраны min-width и min-height. Видео теперь должно показываться полностью без обрезки. Требуется тестирование отображения"
+  
+  - task: "Контакты в footer разместить в строчку"
+    implemented: true
+    working: true
+    file: "/app/frontend/src/components/Footer.css"
+    stuck_count: 0
+    priority: "medium"
     needs_retesting: false
     status_history:
       - working: true
         agent: "main"
-        comment: "Изменен object-fit с contain на cover, добавлены min-width и min-height для полного заполнения контейнера. Видео теперь заполняет окно без серого пространства"
+        comment: "Изменено flex-direction с column на row, добавлен flex-wrap. social-item теперь flex: 0 0 calc(50% - 7.5px). Контакты отображаются в две строки по два элемента. Визуально подтверждено на скриншоте"
 
 metadata:
   created_by: "main_agent"
