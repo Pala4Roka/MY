@@ -1,23 +1,40 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { chatAPI } from '../api';
 import './ChatInterface.css';
-import MAL0Model from './MAL0Model';
+import MAL0ModelNew from './MAL0ModelNew';
 
 export default function ChatInterface({ sessionId }) {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
+  const [currentEmotion, setCurrentEmotion] = useState('calm');
+  const [isUserAtBottom, setIsUserAtBottom] = useState(true);
   const messagesEndRef = useRef(null);
+  const messagesContainerRef = useRef(null);
   const synth = window.speechSynthesis;
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
+  // Check if user is at bottom of chat
+  const checkIfAtBottom = () => {
+    if (!messagesContainerRef.current) return true;
+    const { scrollTop, scrollHeight, clientHeight } = messagesContainerRef.current;
+    return scrollHeight - scrollTop - clientHeight < 50; // Within 50px of bottom
+  };
+
+  const handleScroll = () => {
+    setIsUserAtBottom(checkIfAtBottom());
+  };
+
   useEffect(() => {
-    scrollToBottom();
-  }, [messages]);
+    // Only auto-scroll if user is already at bottom
+    if (isUserAtBottom) {
+      scrollToBottom();
+    }
+  }, [messages, isUserAtBottom]);
 
   const speak = (text) => {
     if (synth.speaking) {
@@ -63,9 +80,11 @@ export default function ChatInterface({ sessionId }) {
     if (!navigator.onLine) {
       const offlineMessage = { 
         role: 'assistant', 
-        content: 'К сожалению, я сейчас в офлайн режиме. Для полного функционала необходимо подключение к сети. Но я всё ещё здесь с вами!' 
+        content: 'К сожалению, я сейчас в офлайн режиме. Для полного функционала необходимо подключение к сети. Но я всё ещё здесь с вами!',
+        emotion: 'sad'
       };
       setMessages(prev => [...prev, offlineMessage]);
+      setCurrentEmotion('sad');
       speak(offlineMessage.content);
       setLoading(false);
       return;
@@ -73,16 +92,23 @@ export default function ChatInterface({ sessionId }) {
 
     try {
       const response = await chatAPI.sendMessage(input, sessionId);
-      const assistantMessage = { role: 'assistant', content: response.response };
+      const assistantMessage = { 
+        role: 'assistant', 
+        content: response.response,
+        emotion: response.emotion || 'calm'
+      };
       setMessages(prev => [...prev, assistantMessage]);
+      setCurrentEmotion(response.emotion || 'calm');
       speak(response.response);
     } catch (error) {
       console.error('Chat error:', error);
       const errorMessage = { 
         role: 'assistant', 
-        content: 'Извините, произошла ошибка. Попробуйте еще раз.' 
+        content: 'Извините, произошла ошибка. Попробуйте еще раз.',
+        emotion: 'sad'
       };
       setMessages(prev => [...prev, errorMessage]);
+      setCurrentEmotion('sad');
     } finally {
       setLoading(false);
     }
@@ -105,12 +131,16 @@ export default function ChatInterface({ sessionId }) {
         <div className="chat-status">{isSpeaking ? 'Говорит...' : 'Online'}</div>
       </div>
       
-      {/* 3D Model of MAL0 */}
+      {/* 3D Model of MAL0 with emotion */}
       <div className="mal0-model-container">
-        <MAL0Model isTalking={isSpeaking} />
+        <MAL0ModelNew isTalking={isSpeaking} emotion={currentEmotion} />
       </div>
       
-      <div className="chat-messages">
+      <div 
+        className="chat-messages" 
+        ref={messagesContainerRef}
+        onScroll={handleScroll}
+      >
         {messages.length === 0 && (
           <div className="welcome-message">
             <p>Добро пожаловать в базу данных Eternal Sentinels.</p>
