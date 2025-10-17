@@ -1,5 +1,6 @@
 import React from 'react';
 import './Footer.css';
+import FooterLogo from './FooterLogo';
 
 export default function Footer() {
   const socialLinks = [
