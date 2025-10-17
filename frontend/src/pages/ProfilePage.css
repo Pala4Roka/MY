@@ -78,20 +78,29 @@
   gap: 5px;
 }
 
+.avatar-controls {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
 .upload-label {
-  width: 50px;
-  height: 50px;
+  padding: 12px 24px;
   background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
-  border: 4px solid #0a0a0a;
-  border-radius: 50%;
+  border: 2px solid #3b82f6;
+  border-radius: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
+  gap: 8px;
   cursor: pointer;
-  font-size: 26px;
+  font-size: 16px;
+  font-weight: 600;
+  color: white;
   transition: all 0.3s ease;
-  box-shadow: 0 0 25px rgba(59, 130, 246, 1), 0 0 50px rgba(59, 130, 246, 0.6), inset 0 0 15px rgba(255, 255, 255, 0.2);
-  animation: uploadButtonPulse 2s ease-in-out infinite;
+  box-shadow: 0 0 20px rgba(59, 130, 246, 0.5);
   position: relative;
   z-index: 10;
 }
@@ -108,33 +117,34 @@
 }
 
 .upload-label:hover {
-  transform: scale(1.25) rotate(15deg);
+  transform: translateY(-2px);
   background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
-  box-shadow: 0 0 40px rgba(59, 130, 246, 1), 0 0 80px rgba(59, 130, 246, 1), inset 0 0 25px rgba(255, 255, 255, 0.4);
-  animation: none;
+  box-shadow: 0 0 30px rgba(59, 130, 246, 0.8);
 }
 
 .remove-avatar-btn {
-  width: 42px;
-  height: 42px;
+  padding: 12px 24px;
   background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%);
-  border: 3px solid #0a0a0a;
-  border-radius: 50%;
+  border: 2px solid #dc2626;
+  border-radius: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
+  gap: 8px;
   cursor: pointer;
-  font-size: 20px;
+  font-size: 16px;
+  font-weight: 600;
+  color: white;
   transition: all 0.3s ease;
-  box-shadow: 0 0 20px rgba(220, 38, 38, 0.7), inset 0 0 10px rgba(255, 255, 255, 0.1);
+  box-shadow: 0 0 20px rgba(220, 38, 38, 0.5);
   position: relative;
   z-index: 10;
 }
 
 .remove-avatar-btn:hover {
-  transform: scale(1.2) rotate(-15deg);
+  transform: translateY(-2px);
   background: linear-gradient(135deg, #b91c1c 0%, #7f1d1d 100%);
-  box-shadow: 0 0 30px rgba(220, 38, 38, 1), inset 0 0 15px rgba(255, 255, 255, 0.2);
+  box-shadow: 0 0 30px rgba(220, 38, 38, 0.8);
 }
 
 .avatar-status {
