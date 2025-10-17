@@ -13,11 +13,16 @@ const THREAT_LEVELS = [
   { key: 'Annihilation', label: 'Аннигиляция (Annihilation)', color: '#7f1d1d' }
 ];
 
-export default function DossierList({ objects, onObjectClick, loading }) {
+export default function DossierList({ objects, onObjectClick, loading, externalThreatFilter = 'all' }) {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedThreat, setSelectedThreat] = useState('all');
   const [showAll, setShowAll] = useState(false);
   const INITIAL_DISPLAY_COUNT = 6;
+
+  // Sync with external filter
+  useEffect(() => {
+    setSelectedThreat(externalThreatFilter);
+  }, [externalThreatFilter]);
 
   const filteredObjects = useMemo(() => {
     let filtered = objects;
