@@ -7,7 +7,6 @@ import ESLogo from '../components/ESLogo';
 import OrganizationInfo from '../components/OrganizationInfo';
 import Footer from '../components/Footer';
 import ScrollToTop from '../components/ScrollToTop';
-import ThreatLevelWheel from '../components/ThreatLevelWheel';
 import { scpAPI, getUser } from '../api';
 
 export default function HomePage({ onAdminClick }) {
@@ -15,7 +14,6 @@ export default function HomePage({ onAdminClick }) {
   const [sessionId] = useState(() => uuidv4());
   const [objects, setObjects] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [selectedThreat, setSelectedThreat] = useState('all');
   const currentUser = getUser();
 
   useEffect(() => {
@@ -35,10 +33,6 @@ export default function HomePage({ onAdminClick }) {
 
   const handleObjectClick = (object) => {
     navigate(`/dossier/${object.number}`);
-  };
-
-  const handleThreatLevelSelect = (level) => {
-    setSelectedThreat(level);
   };
 
   return (
@@ -87,7 +81,6 @@ export default function HomePage({ onAdminClick }) {
           onObjectClick={handleObjectClick}
           loading={loading}
           currentUser={currentUser}
-          externalThreatFilter={selectedThreat}
         />
       </div>
 
@@ -96,12 +89,6 @@ export default function HomePage({ onAdminClick }) {
       
       {/* Scroll to Top Button */}
       <ScrollToTop />
-
-      {/* Threat Level Wheel */}
-      <ThreatLevelWheel 
-        onSelectLevel={handleThreatLevelSelect}
-        currentLevel={selectedThreat}
-      />
     </>
   );
 }
