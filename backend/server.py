@@ -108,18 +108,17 @@ async def initialize_database():
     # Create admin user if not exists
     admin = await db.users.find_one({"username": "admin"})
     if not admin:
-        # Use stronger admin password
         admin_user = {
             "id": "admin-000",
             "username": "admin",
-            "password_hash": hash_password("ES_Admin_2025!Secure"),
+            "password_hash": hash_password("admin123"),
             "clearance_level": 5,
             "created_at": datetime.now(timezone.utc).isoformat(),
             "is_active": True,
             "is_admin": True  # Special flag for admin
         }
         await db.users.insert_one(admin_user)
-        logger.info("Created default admin user with secure password")
+        logger.info("Created default admin user (username: admin, password: admin123)")
 
 
 @app.on_event("startup")
