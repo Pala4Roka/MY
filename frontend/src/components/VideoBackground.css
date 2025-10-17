@@ -169,14 +169,20 @@
 }
 
 /* Responsive design */
+@media (max-width: 1024px) {
+  .video-background-container {
+    height: 500px;
+  }
+}
+
 @media (max-width: 768px) {
   .video-background-container {
-    height: 300px;
+    height: 400px;
   }
 }
 
 @media (max-width: 480px) {
   .video-background-container {
-    height: 250px;
+    height: 300px;
   }
 }
