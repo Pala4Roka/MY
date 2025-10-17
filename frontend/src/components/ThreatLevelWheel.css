@@ -180,12 +180,12 @@
   }
   to {
     opacity: 1;
-    transform: translate(var(--x), var(--y)) scale(1);
+    transform: translate(var(--x, 0), var(--y, 0)) scale(1);
   }
 }
 
 .wheel-item:hover {
-  transform: translate(var(--x), var(--y)) scale(1.15) !important;
+  transform: translate(var(--x, 0), var(--y, 0)) scale(1.15) !important;
   box-shadow: 
     0 6px 20px rgba(0, 0, 0, 0.7),
     0 0 20px currentColor;
