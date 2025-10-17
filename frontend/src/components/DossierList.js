@@ -98,6 +98,12 @@ export default function DossierList({ objects, onObjectClick, loading }) {
         )}
       </div>
 
+      {/* Threat Level Wheel Filter */}
+      <ThreatLevelWheel 
+        onSelectLevel={handleThreatLevelSelect}
+        currentLevel={selectedThreat}
+      />
+
       {/* Results Info */}
       {(searchTerm || selectedThreat !== 'all') && (
         <div className="results-info">
