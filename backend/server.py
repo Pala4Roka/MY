@@ -500,7 +500,7 @@ async def chat_with_mal0(request: ChatRequest, current_user: Optional[dict] = De
         # Check if online
         if not EMERGENT_LLM_KEY:
             return ChatResponse(
-                response="Извините, AI-ассистент временно недоступен. Пожалуйста, обратитесь к базе данных напрямую."
+                response="Извините, MAL0 временно недоступна. Пожалуйста, обратитесь к базе данных напрямую."
             )
         
         # Initialize LLM chat
