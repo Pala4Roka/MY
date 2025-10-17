@@ -79,7 +79,7 @@
 }
 
 .social-item {
-  width: 100%;
+  flex: 0 0 calc(50% - 7.5px);
 }
 
 .social-link {
