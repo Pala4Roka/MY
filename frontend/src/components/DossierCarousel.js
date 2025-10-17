@@ -31,9 +31,25 @@ export default function DossierCarousel({ objects, onObjectClick }) {
 
   const getVisibleObjects = () => {
     const visible = [];
-    for (let i = -1; i <= 1; i++) {
-      const index = (currentIndex + i + objects.length) % objects.length;
-      visible.push({ ...objects[index], position: i });
+    const totalObjects = objects.length;
+    const angleStep = 360 / totalObjects;
+    const radius = 450;
+    
+    for (let i = 0; i < totalObjects; i++) {
+      const index = (currentIndex + i) % totalObjects;
+      const angle = (i * angleStep * Math.PI) / 180;
+      const x = Math.sin(angle) * radius;
+      const z = Math.cos(angle) * radius;
+      const isFront = i === 0;
+      
+      visible.push({
+        ...objects[index],
+        position: i,
+        x: x,
+        z: z,
+        rotateY: -i * angleStep,
+        isFront: isFront
+      });
     }
     return visible;
   };
