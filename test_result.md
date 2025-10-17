@@ -101,3 +101,148 @@
 #====================================================================================================
 # Testing Data - Main Agent and testing sub agent both should log testing data below this section
 #====================================================================================================
+
+user_problem_statement: |
+  Задачи по улучшению сайта Eternal Sentinels:
+  1) Упорядочить досье по номерам (0000, 0002, 0003, 0004...)
+  2) Починить AI ассистента (при ошибке менять текст на "MAL0", убрать прокрутку к карусели)
+  3) Улучшить карусель и убрать надпись о рандомности
+  4) Проверить размер окна MAL0 и убрать черные линии по бокам
+  5) Переместить кнопки управления аватаркой с самой аватарки
+  6) Добавить анимированный фон с возможностью отключения для администратора
+
+backend:
+  - task: "Упорядочить досье в scp_data.py по номерам"
+    implemented: true
+    working: "NA"
+    file: "/app/backend/scp_data.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Создан новый файл scp_data.py с отсортированными объектами по номерам (0000, 0002, 0003, 0004...)"
+
+  - task: "Изменить текст ошибки AI на 'MAL0'"
+    implemented: true
+    working: "NA"
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "medium"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Изменено сообщение об ошибке с 'AI-ассистент' на 'MAL0'"
+
+  - task: "Добавить EMERGENT_LLM_KEY в .env"
+    implemented: true
+    working: "NA"
+    file: "/app/backend/.env"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Добавлен EMERGENT_LLM_KEY в .env файл для работы AI ассистента"
+
+frontend:
+  - task: "Убрать надпись о рандомности в карусели"
+    implemented: true
+    working: "NA"
+    file: "/app/frontend/src/components/DossierCarousel.js"
+    stuck_count: 0
+    priority: "medium"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Изменена надпись с 'РАНДОМНЫЕ ДОСЬЕ' на 'ИЗБРАННЫЕ ДОСЬЕ', убрана строка 'Автоматическая ротация каждые 5 секунд'"
+
+  - task: "Исправить прокрутку страницы при отправке сообщения в чате"
+    implemented: true
+    working: "NA"
+    file: "/app/frontend/src/components/ChatInterface.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Изменена функция scrollToBottom для прокрутки только внутри контейнера чата, а не всей страницы"
+
+  - task: "Убрать черные линии в окне MAL0"
+    implemented: true
+    working: "NA"
+    file: "/app/frontend/src/components/VideoBackground.css"
+    stuck_count: 0
+    priority: "medium"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Изменен object-fit с 'contain' на 'cover' и добавлен object-position: center для убирания черных полос"
+
+  - task: "Переместить кнопки управления аватаркой"
+    implemented: true
+    working: "NA"
+    file: "/app/frontend/src/pages/ProfilePage.js, /app/frontend/src/pages/ProfilePage.css"
+    stuck_count: 0
+    priority: "medium"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Кнопки перенесены из avatar-upload-btn в новый контейнер avatar-controls под аватаркой, обновлены стили для кнопок"
+
+  - task: "Добавить анимированный фон"
+    implemented: true
+    working: "NA"
+    file: "/app/frontend/src/components/AnimatedBackground.js, /app/frontend/src/components/AnimatedBackground.css, /app/frontend/src/App.js"
+    stuck_count: 0
+    priority: "medium"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Создан компонент AnimatedBackground с частицами, светящимися сферами и сеткой. Добавлен в App.js с условием отключения для администраторов (clearance_level >= 5)"
+
+metadata:
+  created_by: "main_agent"
+  version: "1.0"
+  test_sequence: 1
+  run_ui: false
+
+test_plan:
+  current_focus:
+    - "Упорядочить досье в scp_data.py по номерам"
+    - "Изменить текст ошибки AI на 'MAL0'"
+    - "Убрать надпись о рандомности в карусели"
+    - "Исправить прокрутку страницы при отправке сообщения в чате"
+    - "Убрать черные линии в окне MAL0"
+    - "Переместить кнопки управления аватаркой"
+    - "Добавить анимированный фон"
+  stuck_tasks: []
+  test_all: true
+  test_priority: "sequential"
+
+agent_communication:
+  - agent: "main"
+    message: |
+      Выполнены все запрошенные задачи:
+      
+      Backend:
+      1. ✅ Упорядочены досье в scp_data.py по номерам (0000, 0002, 0003, 0004...)
+      2. ✅ Изменено сообщение об ошибке AI на "MAL0"
+      3. ✅ Добавлен EMERGENT_LLM_KEY в .env для работы AI
+      
+      Frontend:
+      4. ✅ Изменена надпись карусели на "ИЗБРАННЫЕ ДОСЬЕ", убрана строка о рандомности
+      5. ✅ Исправлена прокрутка страницы при отправке сообщения в чате
+      6. ✅ Убраны черные линии в окне MAL0 (изменен object-fit)
+      7. ✅ Кнопки управления аватаркой перенесены под аватарку
+      8. ✅ Добавлен анимированный фон с автоматическим отключением для администраторов
+      
+      Все изменения применены. Требуется тестирование.
