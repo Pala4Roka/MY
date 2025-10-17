@@ -73,8 +73,7 @@ export default function ThreatLevelWheel({ onSelectLevel, currentLevel = 'all' }
             
             {/* Center info */}
             <div className="wheel-center">
-              <div className="wheel-center-icon">🛡️</div>
-              <div className="wheel-center-text">ES</div>
+              <ESLogo size="small" />
             </div>
           </div>
         </>
