@@ -98,29 +98,6 @@ export default function DossierList({ objects, onObjectClick, loading, externalT
         )}
       </div>
 
-      {/* Threat Level Filters */}
-      <div className="threat-filters">
-        {THREAT_LEVELS.map(level => (
-          <button
-            key={level.key}
-            className={`threat-filter-btn ${selectedThreat === level.key ? 'active' : ''}`}
-            style={{
-              borderColor: selectedThreat === level.key ? level.color : 'rgba(255, 255, 255, 0.2)',
-              backgroundColor: selectedThreat === level.key ? `${level.color}20` : 'transparent',
-              color: selectedThreat === level.key ? level.color : '#b0b0b0'
-            }}
-            onClick={() => setSelectedThreat(level.key)}
-          >
-            {level.label}
-            {level.key !== 'all' && (
-              <span className="filter-count">
-                ({objects.filter(obj => obj.threat_class && obj.threat_class.includes(level.key)).length})
-              </span>
-            )}
-          </button>
-        ))}
-      </div>
-
       {/* Results Info */}
       {(searchTerm || selectedThreat !== 'all') && (
         <div className="results-info">
