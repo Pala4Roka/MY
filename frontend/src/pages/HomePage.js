@@ -82,6 +82,9 @@ export default function HomePage({ onAdminClick }) {
           currentUser={currentUser}
         />
       </div>
+
+      {/* Footer */}
+      <Footer />
     </>
   );
 }
