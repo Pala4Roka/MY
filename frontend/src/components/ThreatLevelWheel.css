@@ -122,6 +122,25 @@
     inset 0 0 20px rgba(220, 38, 38, 0.2);
   animation: centerGlow 2s ease-in-out infinite;
   z-index: 10;
+  overflow: hidden;
+}
+
+.wheel-center .es-logo-container {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.wheel-center .es-logo-svg {
+  width: 60px;
+  height: 60px;
+}
+
+.wheel-center .es-subtitle,
+.wheel-center .es-code {
+  display: none;
 }
 
 @keyframes centerGlow {
