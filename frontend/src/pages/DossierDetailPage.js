@@ -36,52 +36,75 @@ export default function DossierDetailPage() {
     if (!object) return;
     
     setExporting(true);
-    const doc = new jsPDF();
     
-    // Title
-    doc.setFontSize(20);
-    doc.setTextColor(220, 38, 38);
-    doc.text('ETERNAL SENTINELS', 105, 20, { align: 'center' });
-    
-    // Object Number
-    doc.setFontSize(16);
-    doc.text(`Объект ES-${object.number}`, 105, 35, { align: 'center' });
-    
-    // Details
-    doc.setFontSize(12);
-    doc.setTextColor(0, 0, 0);
-    let y = 50;
-    
-    doc.text(`Имя: ${object.name}`, 20, y);
-    y += 10;
-    doc.text(`Кодовое имя: ${object.codename}`, 20, y);
-    y += 10;
-    doc.text(`Класс угрозы: ${object.threat_class}`, 20, y);
-    y += 15;
-    
-    doc.text('Описание:', 20, y);
-    y += 7;
-    const descLines = doc.splitTextToSize(object.description, 170);
-    doc.text(descLines, 20, y);
-    y += descLines.length * 7 + 10;
-    
-    if (object.special_procedures) {
-      doc.text('Процедуры содержания:', 20, y);
-      y += 7;
-      const procLines = doc.splitTextToSize(object.special_procedures, 170);
-      doc.text(procLines, 20, y);
-      y += procLines.length * 7 + 10;
+    try {
+      // Create formatted text content with proper UTF-8 encoding
+      const content = `
+╔═══════════════════════════════════════════════════════════════════════════╗
+                          ETERNAL SENTINELS                             
+                       ДОСЬЕ ES-${object.number}                                
+╚═══════════════════════════════════════════════════════════════════════════╝
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+[ОСНОВНАЯ ИНФОРМАЦИЯ]
+
+Объект:            ES-${object.number}
+Название:          ${object.name}
+Кодовое имя:       "${object.codename}"
+Класс угрозы:      ${object.threat_class}
+Дата создания:     ${new Date(object.created_at).toLocaleString('ru-RU')}
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+[ОПИСАНИЕ]
+
+${object.description}
+
+${object.special_procedures ? `
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+[ПРОЦЕДУРЫ СОДЕРЖАНИЯ]
+
+${object.special_procedures}
+` : ''}
+
+${object.secret_data && object.secret_data !== '[ТРЕБУЕТСЯ УРОВЕНЬ ДОПУСКА 5]' ? `
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+[СЕКРЕТНЫЕ ДАННЫЕ]
+
+${object.secret_data}
+` : ''}
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Документ сгенерирован: ${new Date().toLocaleString('ru-RU')}
+Организация: Eternal Sentinels (ES)
+Классификация: КОНФИДЕНЦИАЛЬНО
+
+╚═══════════════════════════════════════════════════════════════════════════╝
+`;
+
+      // Create blob with UTF-8 encoding (this preserves Cyrillic characters)
+      const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+      
+      // Create download link
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `ES-${object.number}-${object.name}.txt`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+      
+    } catch (error) {
+      console.error('Export error:', error);
+      alert('Ошибка при экспорте досье');
+    } finally {
+      setExporting(false);
     }
-    
-    if (object.secret_data && !object.is_classified) {
-      doc.text('Секретные данные:', 20, y);
-      y += 7;
-      const secretLines = doc.splitTextToSize(object.secret_data, 170);
-      doc.text(secretLines, 20, y);
-    }
-    
-    doc.save(`ES-${object.number}-${object.name}.pdf`);
-    setExporting(false);
   };
 
   if (loading) {
