@@ -89,6 +89,7 @@ class ChatRequest(BaseModel):
 
 class ChatResponse(BaseModel):
     response: str
+    emotion: str = "calm"  # calm, joy, playful, sad, tired
 
 # Threat class mapping to clearance levels
 THREAT_CLASS_ACCESS = {
