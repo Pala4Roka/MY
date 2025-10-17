@@ -132,7 +132,7 @@ ${object.secret_data}
           ← Назад к списку
         </button>
         <button onClick={exportToPDF} className="export-btn" disabled={exporting}>
-          {exporting ? 'Экспорт...' : '📄 Экспорт в PDF'}
+          {exporting ? 'Экспорт...' : '📄 Скачать досье'}
         </button>
       </div>
 
