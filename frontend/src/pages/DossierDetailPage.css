@@ -26,14 +26,56 @@
   box-shadow: 0 4px 15px rgba(220, 38, 38, 0.3);
 }
 
+.export-buttons {
+  display: flex;
+  gap: 10px;
+}
+
+.export-btn {
+  padding: 0.75rem 1.25rem;
+  font-size: 0.95rem;
+  min-width: 90px;
+  position: relative;
+}
+
+.export-txt {
+  background: linear-gradient(135deg, #6b7280, #4b5563);
+  box-shadow: 0 4px 15px rgba(107, 114, 128, 0.3);
+}
+
+.export-txt:hover {
+  background: linear-gradient(135deg, #4b5563, #374151);
+  box-shadow: 0 6px 20px rgba(107, 114, 128, 0.5);
+}
+
+.export-pdf {
+  background: linear-gradient(135deg, #dc2626, #991b1b);
+  box-shadow: 0 4px 15px rgba(220, 38, 38, 0.3);
+}
+
+.export-pdf:hover {
+  background: linear-gradient(135deg, #991b1b, #7f1d1d);
+  box-shadow: 0 6px 20px rgba(220, 38, 38, 0.5);
+}
+
+.export-doc {
+  background: linear-gradient(135deg, #2563eb, #1d4ed8);
+  box-shadow: 0 4px 15px rgba(37, 99, 235, 0.3);
+}
+
+.export-doc:hover {
+  background: linear-gradient(135deg, #1d4ed8, #1e40af);
+  box-shadow: 0 6px 20px rgba(37, 99, 235, 0.5);
+}
+
 .back-btn:hover, .export-btn:hover {
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(220, 38, 38, 0.5);
 }
 
 .back-btn:disabled, .export-btn:disabled {
   opacity: 0.5;
   cursor: not-allowed;
+  transform: none;
 }
 
 .detail-container {
