@@ -82,8 +82,7 @@ export default function AdminPanel({ currentUser, onLogout }) {
       codename: obj.codename,
       threat_class: obj.threat_class,
       description: obj.description,
-      special_procedures: obj.special_procedures || obj.containment_procedures || '',
-      discovery_info: obj.discovery_info || '',
+      special_procedures: obj.special_procedures || '',
       secret_data: obj.secret_data || ''
     });
   };
