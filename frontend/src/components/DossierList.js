@@ -1,36 +1,142 @@
-import React from 'react';
+import React, { useState, useMemo } from 'react';
 import './DossierList.css';
 
+const THREAT_LEVELS = [
+  { key: 'all', label: 'Все объекты', color: '#6b7280' },
+  { key: 'Threat', label: 'Угроза (Threat)', color: '#4ade80' },
+  { key: 'Hazard', label: 'Опасность (Hazard)', color: '#fbbf24' },
+  { key: 'Cataclysm', label: 'Катаклизм (Cataclysm)', color: '#fb923c' },
+  { key: 'Collapse', label: 'Крушение (Collapse)', color: '#f87171' },
+  { key: 'Apex', label: 'Предел (Apex)', color: '#dc2626' },
+  { key: 'Absolute', label: 'Абсолют (Absolute)', color: '#991b1b' },
+  { key: 'Annihilation', label: 'Аннигиляция (Annihilation)', color: '#7f1d1d' }
+];
+
 export default function DossierList({ objects, onObjectClick, loading }) {
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedThreat, setSelectedThreat] = useState('all');
+
+  const filteredObjects = useMemo(() => {
+    let filtered = objects;
+
+    // Filter by threat level
+    if (selectedThreat !== 'all') {
+      filtered = filtered.filter(obj => 
+        obj.threat_class && obj.threat_class.includes(selectedThreat)
+      );
+    }
+
+    // Filter by search term
+    if (searchTerm.trim()) {
+      const search = searchTerm.toLowerCase();
+      filtered = filtered.filter(obj =>
+        obj.number.toLowerCase().includes(search) ||
+        obj.name.toLowerCase().includes(search) ||
+        obj.codename.toLowerCase().includes(search) ||
+        obj.description.toLowerCase().includes(search)
+      );
+    }
+
+    return filtered;
+  }, [objects, selectedThreat, searchTerm]);
+
   if (loading) {
-    return <div className="loading">Loading dossiers...</div>;
+    return <div className="loading">Загрузка досье...</div>;
   }
 
   return (
     <div className="dossier-list">
       <h2 className="dossier-list-title">ДОСЬЕ ОБЪЕКТОВ</h2>
-      <div className="dossier-grid">
-        {objects.map(obj => (
-          <div 
-            key={obj.id}
-            className={`dossier-card ${obj.is_classified ? 'classified' : ''}`}
-            onClick={() => onObjectClick(obj)}
+      
+      {/* Search Bar */}
+      <div className="dossier-search">
+        <input
+          type="text"
+          className="search-input"
+          placeholder="🔍 Поиск по номеру, имени, кодовому имени..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+        />
+        {searchTerm && (
+          <button 
+            className="clear-search"
+            onClick={() => setSearchTerm('')}
+            title="Очистить поиск"
           >
-            <div className="dossier-card-header">
-              <span className="dossier-number">ES-{obj.number}</span>
-              {obj.is_classified && (
-                <span className="classified-badge">ЗАСЕКРЕЧЕНО</span>
-              )}
-            </div>
-            <h3 className="dossier-name">{obj.name}</h3>
-            <p className="dossier-codename">"{obj.codename}"</p>
-            <div className="dossier-threat">
-              <span className="threat-label">Класс угрозы:</span>
-              <span className="threat-value">{obj.threat_class}</span>
-            </div>
-            <button className="view-btn">Подробнее</button>
-          </div>
+            ✕
+          </button>
+        )}
+      </div>
+
+      {/* Threat Level Filters */}
+      <div className="threat-filters">
+        {THREAT_LEVELS.map(level => (
+          <button
+            key={level.key}
+            className={`threat-filter-btn ${selectedThreat === level.key ? 'active' : ''}`}
+            style={{
+              borderColor: selectedThreat === level.key ? level.color : 'rgba(255, 255, 255, 0.2)',
+              backgroundColor: selectedThreat === level.key ? `${level.color}20` : 'transparent',
+              color: selectedThreat === level.key ? level.color : '#b0b0b0'
+            }}
+            onClick={() => setSelectedThreat(level.key)}
+          >
+            {level.label}
+            {level.key !== 'all' && (
+              <span className="filter-count">
+                ({objects.filter(obj => obj.threat_class && obj.threat_class.includes(level.key)).length})
+              </span>
+            )}
+          </button>
         ))}
+      </div>
+
+      {/* Results Info */}
+      {(searchTerm || selectedThreat !== 'all') && (
+        <div className="results-info">
+          Найдено объектов: <strong>{filteredObjects.length}</strong>
+          {selectedThreat !== 'all' && ` в категории "${THREAT_LEVELS.find(l => l.key === selectedThreat)?.label}"`}
+        </div>
+      )}
+
+      {/* Dossier Grid */}
+      <div className="dossier-grid">
+        {filteredObjects.length === 0 ? (
+          <div className="no-results">
+            <p>Объекты не найдены</p>
+            <button 
+              className="reset-filters-btn"
+              onClick={() => {
+                setSearchTerm('');
+                setSelectedThreat('all');
+              }}
+            >
+              Сбросить фильтры
+            </button>
+          </div>
+        ) : (
+          filteredObjects.map(obj => (
+            <div 
+              key={obj.id}
+              className={`dossier-card ${obj.is_classified ? 'classified' : ''}`}
+              onClick={() => onObjectClick(obj)}
+            >
+              <div className="dossier-card-header">
+                <span className="dossier-number">ES-{obj.number}</span>
+                {obj.is_classified && (
+                  <span className="classified-badge">ЗАСЕКРЕЧЕНО</span>
+                )}
+              </div>
+              <h3 className="dossier-name">{obj.name}</h3>
+              <p className="dossier-codename">"{obj.codename}"</p>
+              <div className="dossier-threat">
+                <span className="threat-label">Класс угрозы:</span>
+                <span className="threat-value">{obj.threat_class}</span>
+              </div>
+              <button className="view-btn">Подробнее →</button>
+            </div>
+          ))
+        )}
       </div>
     </div>
   );
