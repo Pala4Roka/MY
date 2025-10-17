@@ -178,6 +178,9 @@ ${object.secret_data}
           </div>
         </div>
       </div>
+      
+      {/* Scroll to Top Button */}
+      <ScrollToTop />
     </div>
   );
 }
