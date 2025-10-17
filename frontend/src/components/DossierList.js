@@ -63,6 +63,14 @@ export default function DossierList({ objects, onObjectClick, loading }) {
 
   return (
     <div className="dossier-list">
+      {/* Карусель с рандомными досье */}
+      {!searchTerm && selectedThreat === 'all' && (
+        <DossierCarousel 
+          objects={randomObjects} 
+          onObjectClick={onObjectClick}
+        />
+      )}
+
       <h2 className="dossier-list-title">ДОСЬЕ ОБЪЕКТОВ</h2>
       
       {/* Search Bar */}
