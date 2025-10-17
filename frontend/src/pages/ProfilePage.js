@@ -129,28 +129,28 @@ export default function ProfilePage({ user }) {
               <div className="avatar-icon">👤</div>
             )}
             <div className="avatar-status"></div>
-            <div className="avatar-upload-btn">
-              <input
-                type="file"
-                id="avatar-upload"
-                accept="image/jpeg,image/jpg,image/png,image/gif,image/webp"
-                onChange={handleImageUpload}
-                style={{ display: 'none' }}
-                disabled={uploadingImage}
-              />
-              <label htmlFor="avatar-upload" className="upload-label">
-                {uploadingImage ? '⏳' : '📷'}
-              </label>
-              {profileImage && (
-                <button 
-                  onClick={removeProfileImage} 
-                  className="remove-avatar-btn"
-                  title="Удалить изображение"
-                >
-                  🗑️
-                </button>
-              )}
-            </div>
+          </div>
+          <div className="avatar-controls">
+            <input
+              type="file"
+              id="avatar-upload"
+              accept="image/jpeg,image/jpg,image/png,image/gif,image/webp"
+              onChange={handleImageUpload}
+              style={{ display: 'none' }}
+              disabled={uploadingImage}
+            />
+            <label htmlFor="avatar-upload" className="upload-label">
+              {uploadingImage ? '⏳ Загрузка...' : '📷 Изменить аватар'}
+            </label>
+            {profileImage && (
+              <button 
+                onClick={removeProfileImage} 
+                className="remove-avatar-btn"
+                title="Удалить изображение"
+              >
+                🗑️ Удалить
+              </button>
+            )}
           </div>
           <h2>Личный кабинет</h2>
           <p className="profile-subtitle">
