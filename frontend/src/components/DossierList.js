@@ -43,6 +43,20 @@ export default function DossierList({ objects, onObjectClick, loading }) {
     return filtered;
   }, [objects, selectedThreat, searchTerm]);
 
+  // Рандомные досье для карусели
+  const randomObjects = useMemo(() => {
+    const shuffled = [...objects].sort(() => Math.random() - 0.5);
+    return shuffled.slice(0, 10); // Показываем 10 случайных досье в карусели
+  }, [objects]);
+
+  // Досье для отображения под каруселью
+  const displayedObjects = useMemo(() => {
+    if (showAll || searchTerm || selectedThreat !== 'all') {
+      return filteredObjects;
+    }
+    return filteredObjects.slice(0, INITIAL_DISPLAY_COUNT);
+  }, [filteredObjects, showAll, searchTerm, selectedThreat]);
+
   if (loading) {
     return <div className="loading">Загрузка досье...</div>;
   }
