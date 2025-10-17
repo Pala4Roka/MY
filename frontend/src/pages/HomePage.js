@@ -86,6 +86,9 @@ export default function HomePage({ onAdminClick }) {
 
       {/* Footer */}
       <Footer />
+      
+      {/* Scroll to Top Button */}
+      <ScrollToTop />
     </>
   );
 }
