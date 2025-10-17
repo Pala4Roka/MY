@@ -1,0 +1,432 @@
+import React, { useState, useEffect } from 'react';
+import { adminAPI, scpAPI } from '../api';
+import './AdminPanel.css';
+
+export default function AdminPanel({ currentUser, onLogout }) {
+  const [activeTab, setActiveTab] = useState('users');
+  const [users, setUsers] = useState([]);
+  const [objects, setObjects] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [editingObject, setEditingObject] = useState(null);
+  const [editForm, setEditForm] = useState({});
+
+  useEffect(() => {
+    if (activeTab === 'users') {
+      fetchUsers();
+    } else if (activeTab === 'objects') {
+      fetchObjects();
+    }
+  }, [activeTab]);
+
+  const fetchUsers = async () => {
+    setLoading(true);
+    try {
+      const data = await adminAPI.getUsers();
+      setUsers(data);
+      setError('');
+    } catch (err) {
+      setError('Failed to fetch users');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchObjects = async () => {
+    setLoading(true);
+    try {
+      const data = await scpAPI.getAll();
+      setObjects(data);
+      setError('');
+    } catch (err) {
+      setError('Failed to fetch objects');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleClearanceChange = async (userId, newLevel) => {
+    try {
+      await adminAPI.updateClearance(userId, newLevel);
+      fetchUsers();
+    } catch (err) {
+      setError('Failed to update clearance');
+    }
+  };
+
+  const handleStatusToggle = async (userId, currentStatus) => {
+    try {
+      await adminAPI.updateStatus(userId, !currentStatus);
+      fetchUsers();
+    } catch (err) {
+      setError('Failed to update status');
+    }
+  };
+
+  const handleDeleteObject = async (number) => {
+    if (!window.confirm(`Удалить объект ${number}?`)) return;
+    
+    try {
+      await scpAPI.delete(number);
+      fetchObjects();
+    } catch (err) {
+      setError('Failed to delete object');
+    }
+  };
+
+  const handleEditObject = (obj) => {
+    setEditingObject(obj);
+    setEditForm({
+      number: obj.number,
+      name: obj.name,
+      codename: obj.codename,
+      threat_class: obj.threat_class,
+      description: obj.description,
+      special_procedures: obj.special_procedures || '',
+      secret_data: obj.secret_data || ''
+    });
+  };
+
+  const handleSaveEdit = async () => {
+    try {
+      await scpAPI.update(editingObject.number, editForm);
+      setEditingObject(null);
+      setEditForm({});
+      fetchObjects();
+      setError('');
+    } catch (err) {
+      setError('Ошибка при сохранении изменений');
+    }
+  };
+
+  const handleCancelEdit = () => {
+    setEditingObject(null);
+    setEditForm({});
+  };
+
+  const handleDownloadDossier = (obj) => {
+    // Create a formatted text document
+    const content = `
+ETERNAL SENTINELS - ДОСЬЕ ОБЪЕКТА
+═══════════════════════════════════════
+
+ОБЪЕКТ: SCP-${obj.number}
+НАЗВАНИЕ: ${obj.name}
+КОДОВОЕ ИМЯ: "${obj.codename}"
+КЛАСС УГРОЗЫ: ${obj.threat_class}
+
+─────────────────────────────────────────
+
+ОПИСАНИЕ:
+${obj.description}
+
+─────────────────────────────────────────
+
+ПРОЦЕДУРЫ СОДЕРЖАНИЯ:
+${obj.special_procedures || 'Данные отсутствуют'}
+
+${obj.secret_data && obj.secret_data !== '[ТРЕБУЕТСЯ УРОВЕНЬ ДОПУСКА 5]' ? `
+─────────────────────────────────────────
+
+[УРОВЕНЬ ДОПУСКА 5 - СЕКРЕТНАЯ ИНФОРМАЦИЯ]
+${obj.secret_data}
+` : ''}
+
+─────────────────────────────────────────
+Документ создан: ${new Date().toLocaleString('ru-RU')}
+Eternal Sentinels © 2025
+    `.trim();
+
+    // Create download
+    const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `SCP-${obj.number}_${obj.codename}_Dossier.txt`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+
+  const getClearanceName = (level) => {
+    const names = {
+      1: 'Уровень 1 - Ограниченный',
+      2: 'Уровень 2 - Базовый',
+      3: 'Уровень 3 - Расширенный',
+      4: 'Уровень 4 - Секретный',
+      5: 'Уровень 5 - Максимальный'
+    };
+    return names[level] || `Уровень ${level}`;
+  };
+
+  return (
+    <div className="admin-panel">
+      <div className="admin-header">
+        <div>
+          <h1>🛡️ АДМИН-ПАНЕЛЬ</h1>
+          <p className="admin-user-info">
+            Вошел как: <strong>{currentUser.username}</strong> (Уровень допуска: {currentUser.clearance_level})
+          </p>
+        </div>
+        <button onClick={onLogout} className="logout-btn" data-testid="logout-btn">
+          Выйти
+        </button>
+      </div>
+
+      <div className="admin-tabs">
+        <button
+          className={`tab ${activeTab === 'users' ? 'active' : ''}`}
+          onClick={() => setActiveTab('users')}
+          data-testid="users-tab"
+        >
+          Пользователи
+        </button>
+        <button
+          className={`tab ${activeTab === 'objects' ? 'active' : ''}`}
+          onClick={() => setActiveTab('objects')}
+          data-testid="objects-tab"
+        >
+          SCP Объекты
+        </button>
+        <button
+          className={`tab ${activeTab === 'info' ? 'active' : ''}`}
+          onClick={() => setActiveTab('info')}
+          data-testid="info-tab"
+        >
+          Информация
+        </button>
+      </div>
+
+      {error && (
+        <div className="admin-error" data-testid="error-message">
+          {error}
+        </div>
+      )}
+
+      <div className="admin-content">
+        {loading ? (
+          <div className="loading">Загрузка...</div>
+        ) : (
+          <>
+            {activeTab === 'users' && (
+              <div className="users-section">
+                <h2>Управление пользователями</h2>
+                <div className="users-list">
+                  {users.map((user) => (
+                    <div key={user.id} className="user-card" data-testid={`user-${user.id}`}>
+                      <div className="user-info">
+                        <h3>{user.username}</h3>
+                        <p>ID: {user.id}</p>
+                        <p className={`status ${user.is_active ? 'active' : 'inactive'}`}>
+                          {user.is_active ? '🟢 Активен' : '🔴 Неактивен'}
+                        </p>
+                      </div>
+                      
+                      <div className="user-controls">
+                        <div className="clearance-control">
+                          <label>Уровень допуска:</label>
+                          <select
+                            value={user.clearance_level}
+                            onChange={(e) => handleClearanceChange(user.id, parseInt(e.target.value))}
+                            disabled={user.id === currentUser.id}
+                            data-testid={`clearance-${user.id}`}
+                          >
+                            {[1, 2, 3, 4, 5].map((level) => (
+                              <option key={level} value={level}>
+                                {getClearanceName(level)}
+                              </option>
+                            ))}
+                          </select>
+                        </div>
+                        
+                        <button
+                          onClick={() => handleStatusToggle(user.id, user.is_active)}
+                          disabled={user.id === currentUser.id}
+                          className="toggle-status-btn"
+                          data-testid={`toggle-status-${user.id}`}
+                        >
+                          {user.is_active ? 'Деактивировать' : 'Активировать'}
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {activeTab === 'objects' && (
+              <div className="objects-section">
+                <h2>Управление SCP объектами</h2>
+                <p className="section-note">Всего объектов: {objects.length}</p>
+                
+                <div className="objects-grid">
+                  {objects.map((obj) => (
+                    <div key={obj.number} className="object-card" data-testid={`object-${obj.number}`}>
+                      <div className="object-header">
+                        <h3>SCP-{obj.number}</h3>
+                        <span className={`threat-badge threat-${obj.threat_class.toLowerCase()}`}>
+                          {obj.threat_class}
+                        </span>
+                      </div>
+                      
+                      <h4>{obj.name}</h4>
+                      <p className="codename">"{obj.codename}"</p>
+                      
+                      <p className="description">
+                        {obj.description.substring(0, 150)}...
+                      </p>
+                      
+                      <div className="object-actions">
+                        <button 
+                          onClick={() => handleEditObject(obj)}
+                          className="edit-btn"
+                          data-testid={`edit-${obj.number}`}
+                        >
+                          Редактировать
+                        </button>
+                        <button 
+                          onClick={() => handleDownloadDossier(obj)}
+                          className="download-btn"
+                          data-testid={`download-${obj.number}`}
+                        >
+                          Скачать досье
+                        </button>
+                        <button 
+                          onClick={() => handleDeleteObject(obj.number)}
+                          className="delete-btn"
+                          data-testid={`delete-${obj.number}`}
+                        >
+                          Удалить
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {activeTab === 'info' && (
+              <div className="info-section">
+                <h2>Информация о системе</h2>
+                
+                <div className="info-card">
+                  <h3>Уровни допуска</h3>
+                  <ul className="clearance-info">
+                    <li><strong>Уровень 1-2:</strong> Доступ к объектам класса "Угроза (Threat)"</li>
+                    <li><strong>Уровень 3:</strong> Доступ к "Опасность (Hazard)" и "Катаклизм (Cataclysm)"</li>
+                    <li><strong>Уровень 4:</strong> Доступ к "Крушение (Collapse)" и "Предел (Apex)"</li>
+                    <li><strong>Уровень 5:</strong> Полный доступ ко всем объектам, секретным данным и админ-панели</li>
+                  </ul>
+                </div>
+
+                <div className="info-card">
+                  <h3>Классы угроз</h3>
+                  <ul className="threat-info">
+                    <li><span className="threat-badge threat-threat">Threat</span> - Угроза</li>
+                    <li><span className="threat-badge threat-hazard">Hazard</span> - Опасность</li>
+                    <li><span className="threat-badge threat-cataclysm">Cataclysm</span> - Катаклизм</li>
+                    <li><span className="threat-badge threat-collapse">Collapse</span> - Крушение</li>
+                    <li><span className="threat-badge threat-apex">Apex</span> - Предел</li>
+                    <li><span className="threat-badge threat-absolute">Absolute</span> - Абсолют</li>
+                    <li><span className="threat-badge threat-annihilation">Annihilation</span> - Аннигиляция</li>
+                  </ul>
+                </div>
+
+                <div className="info-card">
+                  <h3>MAL0 Ассистент</h3>
+                  <p>MAL0 теперь работает в профессиональном режиме как ассистент базы данных.</p>
+                  <p>Секретные команды и романтическое поведение удалены.</p>
+                </div>
+              </div>
+            )}
+          </>
+        )}
+      </div>
+
+      {/* Edit Modal */}
+      {editingObject && (
+        <div className="modal-overlay" onClick={handleCancelEdit}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h2>Редактировать SCP-{editingObject.number}</h2>
+              <button className="modal-close" onClick={handleCancelEdit}>✕</button>
+            </div>
+            
+            <div className="modal-body">
+              <div className="form-group">
+                <label>Название:</label>
+                <input
+                  type="text"
+                  value={editForm.name}
+                  onChange={(e) => setEditForm({...editForm, name: e.target.value})}
+                />
+              </div>
+
+              <div className="form-group">
+                <label>Кодовое имя:</label>
+                <input
+                  type="text"
+                  value={editForm.codename}
+                  onChange={(e) => setEditForm({...editForm, codename: e.target.value})}
+                />
+              </div>
+
+              <div className="form-group">
+                <label>Класс угрозы:</label>
+                <select
+                  value={editForm.threat_class}
+                  onChange={(e) => setEditForm({...editForm, threat_class: e.target.value})}
+                >
+                  <option value="Threat">Threat - Угроза</option>
+                  <option value="Hazard">Hazard - Опасность</option>
+                  <option value="Cataclysm">Cataclysm - Катаклизм</option>
+                  <option value="Collapse">Collapse - Крушение</option>
+                  <option value="Apex">Apex - Предел</option>
+                  <option value="Absolute">Absolute - Абсолют</option>
+                  <option value="Annihilation">Annihilation - Аннигиляция</option>
+                </select>
+              </div>
+
+              <div className="form-group">
+                <label>Описание:</label>
+                <textarea
+                  value={editForm.description}
+                  onChange={(e) => setEditForm({...editForm, description: e.target.value})}
+                  rows="4"
+                />
+              </div>
+
+              <div className="form-group">
+                <label>Процедуры содержания:</label>
+                <textarea
+                  value={editForm.special_procedures}
+                  onChange={(e) => setEditForm({...editForm, special_procedures: e.target.value})}
+                  rows="4"
+                />
+              </div>
+
+              <div className="form-group">
+                <label>Секретная информация (Уровень 5):</label>
+                <textarea
+                  value={editForm.secret_data}
+                  onChange={(e) => setEditForm({...editForm, secret_data: e.target.value})}
+                  rows="3"
+                />
+              </div>
+            </div>
+
+            <div className="modal-footer">
+              <button className="btn-cancel" onClick={handleCancelEdit}>
+                Отмена
+              </button>
+              <button className="btn-save" onClick={handleSaveEdit}>
+                Сохранить изменения
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
