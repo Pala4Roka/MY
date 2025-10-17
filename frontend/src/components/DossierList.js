@@ -16,6 +16,8 @@ const THREAT_LEVELS = [
 export default function DossierList({ objects, onObjectClick, loading }) {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedThreat, setSelectedThreat] = useState('all');
+  const [showAll, setShowAll] = useState(false);
+  const INITIAL_DISPLAY_COUNT = 6;
 
   const filteredObjects = useMemo(() => {
     let filtered = objects;
