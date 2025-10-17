@@ -16,7 +16,9 @@ export default function ChatInterface({ sessionId }) {
   const synth = window.speechSynthesis;
 
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    if (messagesContainerRef.current) {
+      messagesContainerRef.current.scrollTop = messagesContainerRef.current.scrollHeight;
+    }
   };
 
   // Check if user is at bottom of chat
