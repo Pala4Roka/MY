@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { scpAPI } from '../api';
-import jsPDF from 'jspdf';
 import './DossierDetailPage.css';
 
 export default function DossierDetailPage() {
