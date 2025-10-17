@@ -62,42 +62,27 @@
 
 .carousel-card {
   position: absolute;
-  width: 100%;
+  width: 300px;
   background: linear-gradient(135deg, rgba(30, 30, 30, 0.95) 0%, rgba(20, 20, 20, 1) 100%);
   border: 2px solid rgba(220, 38, 38, 0.4);
   border-radius: 12px;
   padding: 30px;
-  transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
   cursor: pointer;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
   transform-style: preserve-3d;
-  animation: rotate3d 8s linear infinite;
-}
-
-/* 3D rotation animation */
-@keyframes rotate3d {
-  0% {
-    transform: rotateY(0deg);
-  }
-  100% {
-    transform: rotateY(360deg);
-  }
-}
-
-/* Stop animation on hover */
-.carousel-card:hover {
-  animation-play-state: paused;
+  backface-visibility: hidden;
 }
 
 .carousel-card.position-0 {
   border-color: #dc2626;
   box-shadow: 0 0 40px rgba(220, 38, 38, 0.5), 0 8px 32px rgba(0, 0, 0, 0.6);
+  z-index: 10;
 }
 
 .carousel-card.position-0:hover {
-  transform: translateX(0) scale(1.08) rotateY(var(--hover-rotateY, 0deg)) !important;
+  transform: translateZ(50px) scale(1.05) !important;
   box-shadow: 0 0 50px rgba(220, 38, 38, 0.7), 0 12px 48px rgba(0, 0, 0, 0.8);
-  animation-play-state: paused;
 }
 
 .carousel-card.classified {
