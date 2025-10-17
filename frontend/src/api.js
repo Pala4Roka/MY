@@ -86,7 +86,17 @@ export const scpAPI = {
     return response.data;
   },
   
+  updateObject: async (number, data) => {
+    const response = await apiClient.put(`/scp/${number}`, data);
+    return response.data;
+  },
+  
   delete: async (number) => {
+    const response = await apiClient.delete(`/scp/${number}`);
+    return response.data;
+  },
+  
+  deleteObject: async (number) => {
     const response = await apiClient.delete(`/scp/${number}`);
     return response.data;
   },
