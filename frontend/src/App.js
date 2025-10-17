@@ -74,8 +74,8 @@ function App() {
   return (
     <Router>
       <div className="App">
-        {/* Animated background - disabled for admin users */}
-        <AnimatedBackground disabled={user && user.clearance_level >= 5} />
+        {/* Animated background with toggle button */}
+        <AnimatedBackground />
         
         <div className="main-content">
           <Routes>
