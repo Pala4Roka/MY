@@ -1,7 +1,30 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import './ESLogo.css';
 
 export default function ESLogo({ size = 'large' }) {
+  const [blinkState, setBlinkState] = useState(1); // 1 = open, 0 = closed
+  const [pupilPosition, setPupilPosition] = useState({ x: 0, y: 0 });
+
+  useEffect(() => {
+    // Random blinking
+    const blinkInterval = setInterval(() => {
+      setBlinkState(0); // Close eye
+      setTimeout(() => setBlinkState(1), 150); // Open eye after 150ms
+    }, Math.random() * 4000 + 2000); // Random interval 2-6 seconds
+
+    // Random eye movement
+    const moveInterval = setInterval(() => {
+      const randomX = (Math.random() - 0.5) * 10; // -5 to 5
+      const randomY = (Math.random() - 0.5) * 10; // -5 to 5
+      setPupilPosition({ x: randomX, y: randomY });
+    }, Math.random() * 3000 + 1000); // Random interval 1-4 seconds
+
+    return () => {
+      clearInterval(blinkInterval);
+      clearInterval(moveInterval);
+    };
+  }, []);
+
   return (
     <div className={`es-logo-container ${size}`}>
       <div className="es-logo-content">
@@ -40,22 +63,63 @@ export default function ESLogo({ size = 'large' }) {
           <circle cx="35" cy="100" r="8" fill="none" stroke="#dc2626" strokeWidth="2" opacity="0.7"/>
           <circle cx="165" cy="100" r="8" fill="none" stroke="#dc2626" strokeWidth="2" opacity="0.7"/>
           
-          {/* Eye shape */}
-          <ellipse cx="100" cy="100" rx="40" ry="25" fill="none" stroke="#f0f0f0" strokeWidth="3" opacity="0.9"/>
+          {/* Eye shape with blinking animation */}
+          <ellipse 
+            cx="100" 
+            cy="100" 
+            rx="40" 
+            ry={25 * blinkState} 
+            fill="none" 
+            stroke="#f0f0f0" 
+            strokeWidth="3" 
+            opacity="0.9"
+            style={{ transition: 'ry 0.1s ease-out' }}
+          />
           
           {/* Inner eye circles - Blue with blinking animation */}
-          <circle cx="100" cy="100" r="20" fill="url(#eyeGlow)" opacity="0.5">
-            <animate attributeName="r" values="20;18;20" dur="3s" repeatCount="indefinite"/>
-          </circle>
-          <circle cx="100" cy="100" r="15" fill="none" stroke="#3b82f6" strokeWidth="2" opacity="0.8">
-            <animate attributeName="opacity" values="0.8;0.2;0.8" dur="3s" repeatCount="indefinite"/>
-          </circle>
+          <circle 
+            cx="100" 
+            cy="100" 
+            r={20 * blinkState} 
+            fill="url(#eyeGlow)" 
+            opacity={0.5 * blinkState}
+            style={{ transition: 'r 0.1s ease-out, opacity 0.1s ease-out' }}
+          />
+          <circle 
+            cx="100" 
+            cy="100" 
+            r={15 * blinkState} 
+            fill="none" 
+            stroke="#3b82f6" 
+            strokeWidth="2" 
+            opacity={0.8 * blinkState}
+            style={{ transition: 'r 0.1s ease-out, opacity 0.1s ease-out' }}
+          />
           
-          {/* Central pupil - Blue with intense glow */}
-          <circle cx="100" cy="100" r="8" fill="#3b82f6" opacity="1">
-            <animate attributeName="opacity" values="1;0.3;1" dur="3s" repeatCount="indefinite"/>
-            <animate attributeName="r" values="8;6;8" dur="3s" repeatCount="indefinite"/>
-          </circle>
+          {/* Central pupil - Blue with intense glow and movement */}
+          <circle 
+            cx={100 + pupilPosition.x} 
+            cy={100 + pupilPosition.y} 
+            r={8 * blinkState} 
+            fill="#3b82f6" 
+            opacity={1 * blinkState}
+            style={{ transition: 'cx 0.5s ease-out, cy 0.5s ease-out, r 0.1s ease-out, opacity 0.1s ease-out' }}
+          />
+          
+          {/* Eyelids for blinking effect */}
+          {blinkState < 1 && (
+            <>
+              <ellipse 
+                cx="100" 
+                cy="100" 
+                rx="40" 
+                ry="3" 
+                fill="#0a0a0a" 
+                opacity={1 - blinkState}
+                style={{ transition: 'opacity 0.1s ease-out' }}
+              />
+            </>
+          )}
           
           {/* Technical marks */}
           {Array.from({ length: 36 }).map((_, i) => {
