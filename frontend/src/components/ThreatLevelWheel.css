@@ -1,0 +1,318 @@
+/* Threat Level Wheel Component Styles */
+.threat-wheel-container {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  margin: 30px 0;
+  z-index: 10;
+}
+
+/* Main button */
+.threat-wheel-btn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 15px 25px;
+  background: linear-gradient(135deg, rgba(220, 38, 38, 0.95), rgba(153, 27, 27, 0.95));
+  border: 2px solid rgba(220, 38, 38, 0.6);
+  border-radius: 50px;
+  color: white;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 
+    0 4px 15px rgba(220, 38, 38, 0.4),
+    0 0 30px rgba(220, 38, 38, 0.2);
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(10px);
+}
+
+.threat-wheel-btn:hover {
+  transform: translateY(-2px) scale(1.05);
+  box-shadow: 
+    0 6px 20px rgba(220, 38, 38, 0.6),
+    0 0 40px rgba(220, 38, 38, 0.3);
+  background: linear-gradient(135deg, rgba(220, 38, 38, 1), rgba(153, 27, 27, 1));
+}
+
+.threat-wheel-btn.active {
+  transform: scale(0.95);
+  background: linear-gradient(135deg, rgba(153, 27, 27, 0.95), rgba(127, 29, 29, 0.95));
+}
+
+.btn-icon {
+  font-size: 20px;
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+}
+
+.btn-text {
+  white-space: nowrap;
+}
+
+/* Backdrop */
+.wheel-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(2px);
+  z-index: 998;
+  animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Circular wheel */
+.threat-wheel {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 400px;
+  height: 400px;
+  z-index: 999;
+  animation: wheelAppear 0.3s ease;
+}
+
+@keyframes wheelAppear {
+  from {
+    transform: scale(0) rotate(-180deg);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1) rotate(0deg);
+    opacity: 1;
+  }
+}
+
+/* Wheel center */
+.wheel-center {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 80px;
+  height: 80px;
+  background: radial-gradient(circle, rgba(220, 38, 38, 0.3), rgba(20, 20, 30, 0.95));
+  border: 3px solid rgba(220, 38, 38, 0.6);
+  border-radius: 50%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 
+    0 0 20px rgba(220, 38, 38, 0.4),
+    inset 0 0 20px rgba(220, 38, 38, 0.2);
+  animation: centerGlow 2s ease-in-out infinite;
+  z-index: 10;
+  overflow: hidden;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.wheel-center:hover {
+  transform: translate(-50%, -50%) scale(1.1);
+  box-shadow: 
+    0 0 30px rgba(220, 38, 38, 0.6),
+    inset 0 0 30px rgba(220, 38, 38, 0.3);
+  background: radial-gradient(circle, rgba(220, 38, 38, 0.5), rgba(20, 20, 30, 0.95));
+}
+
+.wheel-center .es-logo-container {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.wheel-center .es-logo-svg {
+  width: 60px;
+  height: 60px;
+}
+
+.wheel-center .es-subtitle,
+.wheel-center .es-code {
+  display: none;
+}
+
+@keyframes centerGlow {
+  0%, 100% {
+    box-shadow: 
+      0 0 20px rgba(220, 38, 38, 0.4),
+      inset 0 0 20px rgba(220, 38, 38, 0.2);
+  }
+  50% {
+    box-shadow: 
+      0 0 30px rgba(220, 38, 38, 0.6),
+      inset 0 0 30px rgba(220, 38, 38, 0.3);
+  }
+}
+
+.wheel-center-icon {
+  font-size: 28px;
+  margin-bottom: 2px;
+}
+
+.wheel-center-text {
+  font-size: 14px;
+  font-weight: 700;
+  color: rgba(220, 38, 38, 0.9);
+  text-shadow: 0 0 10px rgba(220, 38, 38, 0.5);
+}
+
+/* Wheel items */
+.wheel-item {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 100px;
+  height: 100px;
+  margin: -50px 0 0 -50px;
+  background: rgba(20, 20, 30, 0.95);
+  border: 2px solid;
+  border-radius: 50%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
+  animation: itemSlideIn 0.4s ease forwards;
+  opacity: 0;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+}
+
+@keyframes itemSlideIn {
+  from {
+    opacity: 0;
+    transform: translate(0, 0) scale(0.3);
+  }
+  to {
+    opacity: 1;
+    transform: translate(var(--x, 0), var(--y, 0)) scale(1);
+  }
+}
+
+.wheel-item:hover {
+  transform: translate(var(--x, 0), var(--y, 0)) scale(1.15) !important;
+  box-shadow: 
+    0 6px 20px rgba(0, 0, 0, 0.7),
+    0 0 20px currentColor;
+  z-index: 100;
+}
+
+.wheel-item.selected {
+  box-shadow: 
+    0 0 25px currentColor,
+    0 0 40px currentColor,
+    inset 0 0 20px currentColor;
+  border-width: 3px;
+}
+
+.wheel-item-icon {
+  font-size: 28px;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.5));
+}
+
+.wheel-item-label {
+  font-size: 11px;
+  font-weight: 600;
+  text-align: center;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.7);
+  white-space: nowrap;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .threat-wheel-container {
+    bottom: 20px;
+    right: 20px;
+  }
+
+  .threat-wheel-btn {
+    padding: 12px 20px;
+    font-size: 14px;
+  }
+
+  .btn-icon {
+    font-size: 18px;
+  }
+
+  .threat-wheel {
+    width: 300px;
+    height: 300px;
+    bottom: 90px;
+    right: 50%;
+    transform: translateX(50%);
+  }
+
+  .wheel-item {
+    width: 80px;
+    height: 80px;
+    margin: -40px 0 0 -40px;
+  }
+
+  .wheel-item-icon {
+    font-size: 24px;
+  }
+
+  .wheel-item-label {
+    font-size: 10px;
+  }
+
+  .wheel-center {
+    width: 60px;
+    height: 60px;
+  }
+
+  .wheel-center-icon {
+    font-size: 22px;
+  }
+
+  .wheel-center-text {
+    font-size: 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .threat-wheel {
+    width: 250px;
+    height: 250px;
+  }
+
+  .wheel-item {
+    width: 65px;
+    height: 65px;
+    margin: -32.5px 0 0 -32.5px;
+  }
+
+  .wheel-item-icon {
+    font-size: 20px;
+  }
+
+  .wheel-item-label {
+    font-size: 9px;
+  }
+}
