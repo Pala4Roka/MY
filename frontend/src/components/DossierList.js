@@ -126,7 +126,7 @@ export default function DossierList({ objects, onObjectClick, loading }) {
 
       {/* Dossier Grid */}
       <div className="dossier-grid">
-        {filteredObjects.length === 0 ? (
+        {displayedObjects.length === 0 ? (
           <div className="no-results">
             <p>Объекты не найдены</p>
             <button 
@@ -140,7 +140,7 @@ export default function DossierList({ objects, onObjectClick, loading }) {
             </button>
           </div>
         ) : (
-          filteredObjects.map(obj => (
+          displayedObjects.map(obj => (
             <div 
               key={obj.id}
               className={`dossier-card ${obj.is_classified ? 'classified' : ''}`}
@@ -163,6 +163,33 @@ export default function DossierList({ objects, onObjectClick, loading }) {
           ))
         )}
       </div>
+
+      {/* Кнопка "Показать все" */}
+      {!showAll && !searchTerm && selectedThreat === 'all' && filteredObjects.length > INITIAL_DISPLAY_COUNT && (
+        <div className="show-all-container">
+          <button 
+            className="show-all-btn"
+            onClick={() => setShowAll(true)}
+          >
+            📂 Показать все досье ({filteredObjects.length})
+          </button>
+        </div>
+      )}
+
+      {/* Кнопка "Скрыть" */}
+      {showAll && !searchTerm && selectedThreat === 'all' && (
+        <div className="show-all-container">
+          <button 
+            className="show-all-btn"
+            onClick={() => {
+              setShowAll(false);
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+            }}
+          >
+            ⬆️ Скрыть
+          </button>
+        </div>
+      )}
     </div>
   );
 }
