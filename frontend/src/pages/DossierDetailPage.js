@@ -11,6 +11,7 @@ export default function DossierDetailPage() {
   const [object, setObject] = useState(null);
   const [loading, setLoading] = useState(true);
   const [exporting, setExporting] = useState(false);
+  const [exportFormat, setExportFormat] = useState('');
   const [error, setError] = useState('');
 
   useEffect(() => {
@@ -33,78 +34,26 @@ export default function DossierDetailPage() {
     }
   };
 
-  const exportToPDF = () => {
+  const handleExport = async (format) => {
     if (!object) return;
     
     setExporting(true);
+    setExportFormat(format);
     
     try {
-      // Create formatted text content with proper UTF-8 encoding
-      const content = `
-╔═══════════════════════════════════════════════════════════════════════════╗
-                          ETERNAL SENTINELS                             
-                       ДОСЬЕ ES-${object.number}                                
-╚═══════════════════════════════════════════════════════════════════════════╝
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-[ОСНОВНАЯ ИНФОРМАЦИЯ]
-
-Объект:            ES-${object.number}
-Название:          ${object.name}
-Кодовое имя:       "${object.codename}"
-Класс угрозы:      ${object.threat_class}
-Дата создания:     ${new Date(object.created_at).toLocaleString('ru-RU')}
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-[ОПИСАНИЕ]
-
-${object.description}
-
-${object.special_procedures ? `
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-[ПРОЦЕДУРЫ СОДЕРЖАНИЯ]
-
-${object.special_procedures}
-` : ''}
-
-${object.secret_data && object.secret_data !== '[ТРЕБУЕТСЯ УРОВЕНЬ ДОПУСКА 5]' ? `
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-[СЕКРЕТНЫЕ ДАННЫЕ]
-
-${object.secret_data}
-` : ''}
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-Документ сгенерирован: ${new Date().toLocaleString('ru-RU')}
-Организация: Eternal Sentinels (ES)
-Классификация: КОНФИДЕНЦИАЛЬНО
-
-╚═══════════════════════════════════════════════════════════════════════════╝
-`;
-
-      // Create blob with UTF-8 encoding (this preserves Cyrillic characters)
-      const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
-      
-      // Create download link
-      const url = window.URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = `ES-${object.number}-${object.name}.txt`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      window.URL.revokeObjectURL(url);
-      
+      if (format === 'txt') {
+        exportToTXT(object);
+      } else if (format === 'pdf') {
+        await exportToPDF(object);
+      } else if (format === 'doc') {
+        await exportToDOC(object);
+      }
     } catch (error) {
       console.error('Export error:', error);
-      alert('Ошибка при экспорте досье');
+      alert(`Ошибка при экспорте досье в формат ${format.toUpperCase()}`);
     } finally {
       setExporting(false);
+      setExportFormat('');
     }
   };
 
