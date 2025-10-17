@@ -141,6 +141,18 @@ backend:
       - working: true
         agent: "main"
         comment: "Backend API endpoint PUT /api/scp/{number} работает, модальное окно редактирования открывается"
+  
+  - task: "Проверить систему доступа по уровням допуска (clearance levels)"
+    implemented: true
+    working: "NA"
+    file: "/app/backend/server.py, /app/backend/models.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Система контроля доступа реализована: THREAT_CLASS_ACCESS маппинг определен, проверка clearance_level >= required_clearance в get_scp_objects и get_scp_object. Требуется тестирование с разными уровнями допуска (1-4)"
 
 frontend:
   - task: "Добавить круговое меню ThreatLevelWheel в DossierList"
