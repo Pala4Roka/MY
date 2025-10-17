@@ -144,15 +144,18 @@ backend:
   
   - task: "Проверить систему доступа по уровням допуска (clearance levels)"
     implemented: true
-    working: "NA"
+    working: true
     file: "/app/backend/server.py, /app/backend/models.py"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: "NA"
         agent: "main"
         comment: "Система контроля доступа реализована: THREAT_CLASS_ACCESS маппинг определен, проверка clearance_level >= required_clearance в get_scp_objects и get_scp_object. Требуется тестирование с разными уровнями допуска (1-4)"
+      - working: true
+        agent: "testing"
+        comment: "КРИТИЧЕСКАЯ ОШИБКА ИСПРАВЛЕНА: Функция get_required_clearance не работала с форматом threat_class из базы данных ('Threat (Угроза)' вместо 'Threat'). Исправлено извлечение базового класса угрозы. ПОЛНОЕ ТЕСТИРОВАНИЕ ПРОЙДЕНО: Уровень 1 видит только Threat (2 объекта), Уровень 3 видит Threat+Hazard+Cataclysm (6 объектов), Уровень 4 видит Threat+Hazard+Cataclysm+Apex (15 объектов). 403 ошибки корректно возвращаются для объектов выше уровня допуска. Secret_data скрыт для уровней < 5. MAL0 AI чат работает для всех уровней. Все 55 тестов пройдены успешно."
 
 frontend:
   - task: "Добавить круговое меню ThreatLevelWheel в DossierList"
