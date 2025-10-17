@@ -125,65 +125,65 @@ backend:
         comment: "Объекты уже отсортированы по номерам (0000, 0002, 0003, 0004...) в scp_data.py"
 
 frontend:
-  - task: "Убрать надпись о рандомности в карусели"
+  - task: "Убрать кнопку включения/отключения анимации фона"
     implemented: true
-    working: "NA"
-    file: "/app/frontend/src/components/DossierCarousel.js"
-    stuck_count: 0
-    priority: "medium"
-    needs_retesting: true
-    status_history:
-      - working: "NA"
-        agent: "main"
-        comment: "Изменена надпись с 'РАНДОМНЫЕ ДОСЬЕ' на 'ИЗБРАННЫЕ ДОСЬЕ', убрана строка 'Автоматическая ротация каждые 5 секунд'"
-
-  - task: "Исправить прокрутку страницы при отправке сообщения в чате"
-    implemented: true
-    working: "NA"
-    file: "/app/frontend/src/components/ChatInterface.js"
+    working: true
+    file: "/app/frontend/src/components/AnimatedBackground.js"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
-      - working: "NA"
+      - working: true
         agent: "main"
-        comment: "Изменена функция scrollToBottom для прокрутки только внутри контейнера чата, а не всей страницы"
+        comment: "Удалена кнопка toggleи localStorage логика для управления анимацией. Анимация теперь всегда активна"
 
-  - task: "Убрать черные линии в окне MAL0"
+  - task: "Изменить анимацию фона на SCP-тематику"
     implemented: true
-    working: "NA"
+    working: true
+    file: "/app/frontend/src/components/AnimatedBackground.js, /app/frontend/src/components/AnimatedBackground.css"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "main"
+        comment: "Полностью переработана анимация фона: добавлены аномальные частицы (30 шт), глитч-сканлайны, пульсирующие поля сдерживания (3 шт), потоки данных (5 линий) и гексагональная сетка. Все в стиле SCP/ES организации"
+
+  - task: "Добавить кнопку 'все объекты' с круговым меню уровней опасности"
+    implemented: true
+    working: true
+    file: "/app/frontend/src/components/ThreatLevelWheel.js, /app/frontend/src/components/ThreatLevelWheel.css, /app/frontend/src/pages/HomePage.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "main"
+        comment: "Создан новый компонент ThreatLevelWheel с круговым меню из 8 уровней опасности. Кнопка расположена в правом нижнем углу. При клике открывается колесо с уровнями: Все, Угроза, Опасность, Катаклизм, Крушение, Предел, Абсолют, Аннигиляция. Интегрировано с фильтрацией в DossierList"
+
+  - task: "Размер видео MAL0 уже исправлен"
+    implemented: true
+    working: true
     file: "/app/frontend/src/components/VideoBackground.css"
     stuck_count: 0
     priority: "medium"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
-      - working: "NA"
+      - working: true
         agent: "main"
-        comment: "Изменен object-fit с 'contain' на 'cover' и добавлен object-position: center для убирания черных полос"
+        comment: "VideoBackground уже использует object-fit: cover и object-position: center для заполнения без черных полос"
 
-  - task: "Переместить кнопки управления аватаркой"
+  - task: "Создать документ с фишками сайта"
     implemented: true
-    working: "NA"
-    file: "/app/frontend/src/pages/ProfilePage.js, /app/frontend/src/pages/ProfilePage.css"
+    working: true
+    file: "/app/SITE_FEATURES.md"
     stuck_count: 0
     priority: "medium"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
-      - working: "NA"
+      - working: true
         agent: "main"
-        comment: "Кнопки перенесены из avatar-upload-btn в новый контейнер avatar-controls под аватаркой, обновлены стили для кнопок"
-
-  - task: "Добавить анимированный фон"
-    implemented: true
-    working: "NA"
-    file: "/app/frontend/src/components/AnimatedBackground.js, /app/frontend/src/components/AnimatedBackground.css, /app/frontend/src/App.js"
-    stuck_count: 0
-    priority: "medium"
-    needs_retesting: true
-    status_history:
-      - working: "NA"
-        agent: "main"
-        comment: "Создан компонент AnimatedBackground с частицами, светящимися сферами и сеткой. Добавлен в App.js с условием отключения для администраторов (clearance_level >= 5)"
+        comment: "Создан подробный документ SITE_FEATURES.md с описанием всех особенностей сайта: размеры окна MAL0, чат-интерфейс, система уровней допуска, классификация угроз, дизайн, база данных (18 досье), безопасность, технологический стек и уникальные особенности"
 
 metadata:
   created_by: "main_agent"
