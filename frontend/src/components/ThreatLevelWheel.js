@@ -71,10 +71,14 @@ export default function ThreatLevelWheel({ onSelectLevel, currentLevel = 'all' }
               );
             })}
             
-            {/* Center info */}
-            <div className="wheel-center">
+            {/* Center info - clickable to close menu */}
+            <button 
+              className="wheel-center"
+              onClick={() => setIsOpen(false)}
+              title="Закрыть меню"
+            >
               <ESLogo size="small" />
-            </div>
+            </button>
           </div>
         </>
       )}
