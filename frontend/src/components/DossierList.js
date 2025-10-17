@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import './DossierList.css';
+import DossierCarousel from './DossierCarousel';
 
 const THREAT_LEVELS = [
   { key: 'all', label: 'Все объекты', color: '#6b7280' },
